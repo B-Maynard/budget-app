@@ -1,0 +1,88 @@
+.main-page-wrapper {
+
+    .main-page-container {
+        width: 98%;
+        margin: 0 auto;
+
+        .header {
+            display: flex;
+            width: 100%;
+            padding-bottom: 5px;
+            border-bottom: 1px solid white;
+
+            .income-total {
+                flex: 50;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+
+                .income-input {
+                    width: 150px;
+                }
+            }
+
+            .total-money-left {
+                flex: 50;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+            }
+
+            hr {
+                width: 0;
+                border: 1px solid white;
+            }
+        }
+
+        .current-bills {
+            .buttons {
+                display: flex;
+                justify-content: space-evenly;
+                align-items: center;
+                margin-top: 5px;
+                margin-bottom: 20px;
+            }
+
+            .bill {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 10px;
+
+                .remove-bill {
+                    flex: 1;
+                    display: flex;
+                    justify-content: flex-start;
+                }
+
+                .bill-name {
+                    flex: 2;
+                    display: flex;
+                    justify-content: center;
+                }
+
+                .bill-price {
+                    flex: 1;
+                    display: flex;
+                    justify-content: flex-end;
+                }
+            }
+
+            .bill-name {
+
+                .bill-select {
+                    width: 150px;
+                    height: 40px;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+            }
+        }
+    }
+
+    .sub-header-text {
+        font-size: 1.5em;
+    }
+}
