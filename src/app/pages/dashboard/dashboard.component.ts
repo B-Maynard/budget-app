@@ -55,6 +55,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
         this.selectedBills = currentBillObj.bills;
         this.income = currentBillObj.income;
+        this.spent = currentBillObj.spent;
 
         this.selectedBills.forEach((bill: Bill) => {
           bill.saved = true;
