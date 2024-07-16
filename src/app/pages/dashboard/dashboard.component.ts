@@ -34,6 +34,7 @@ import { Bill, CurrentBillConfig } from './dashboard.interface';
 export class DashboardComponent implements OnInit, AfterViewInit {
 
   public income: number = 0;
+  public spent: number = 0;
   public billTotal: number = 0;
   public bills: any[] = [];
 

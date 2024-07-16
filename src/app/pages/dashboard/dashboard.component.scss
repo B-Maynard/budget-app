@@ -10,20 +10,18 @@
             padding-bottom: 5px;
             border-bottom: 1px solid white;
 
-            .income-total {
-                flex: 50;
+            .input-box {
                 display: flex;
                 flex-direction: column;
                 justify-content: center;
                 align-items: center;
 
                 .income-input {
-                    width: 150px;
+                    width: 100px;
                 }
             }
 
             .total-money-left {
-                flex: 50;
                 display: flex;
                 flex-direction: column;
                 justify-content: center;

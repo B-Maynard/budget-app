@@ -3,11 +3,18 @@
     <p-confirmDialog />
     <div class="main-page-container">
       <div class="header">
-        <div class="income-total">
+        <div class="input-box">
             <div class="sub-header-text">
                 Income
             </div>
             <input class="income-input" type="number" pInputText [(ngModel)]="income" />
+        </div>
+        <hr>
+        <div class="input-box">
+            <div class="sub-header-text">
+                Spent
+            </div>
+            <input class="income-input" type="number" pInputText [(ngModel)]="spent" />
         </div>
         <hr>
         <div class="total-money-left">
@@ -15,7 +22,7 @@
                 Total Left
             </div>
             <div class="total">
-                {{income - billTotal}}
+                {{income - (spent + billTotal)}}
             </div>
         </div>
       </div>
