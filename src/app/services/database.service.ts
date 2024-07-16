@@ -33,8 +33,10 @@ export class DatabaseService {
 
     public callDatabaseEndpoint(method: any, url: any, options: any) {
 
+        let accessToken = JSON.parse(JSON.stringify(sessionStorage.getItem(sessionConfig.dbAccessToken)));
+
         let headers = new HttpHeaders();
-        headers = headers.set("Authorization", `Bearer ${sessionStorage.getItem(sessionConfig.dbAccessToken)}`);
+        headers = headers.set("Authorization", `Bearer ${accessToken}`);
 
         if (options.headers) {
             options.headers.append(headers);
