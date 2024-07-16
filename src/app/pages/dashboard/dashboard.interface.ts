@@ -6,5 +6,6 @@ export interface Bill {
 
 export interface CurrentBillConfig {
     income: number;
+    spent: number;
     bills: Bill[];
 }

@@ -130,6 +130,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   saveBills() {
     let currentBillObj: CurrentBillConfig = {
       income: this.income,
+      spent: this.spent,
       bills: []
     }
 
