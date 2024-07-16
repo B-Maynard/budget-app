@@ -45,6 +45,8 @@
                         (onChange)="onBillChange($event, bill.index)"
                         optionLabel="name"
                         placeholder="Select a bill..."
+                        [filter]="true"
+                        filterBy="name"
                     />
                     <input *ngIf="bill.saved" [disabled]="true" class="bill-name-input" type="text" pInputText  [ngModel]="bill.name"/>
                 </div>
