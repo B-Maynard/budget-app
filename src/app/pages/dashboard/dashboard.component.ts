@@ -33,8 +33,9 @@ import { Bill, CurrentBillConfig } from './dashboard.interface';
 })
 export class DashboardComponent implements OnInit, AfterViewInit {
 
-  public income: number = 0;
-  public spent: number = 0;
+  public currentMoney: number = 0;
+  public moneySpent: number = 0;
+
   public billTotal: number = 0;
   public bills: any[] = [];
 
@@ -54,8 +55,8 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         let currentBillObj = JSON.parse(localStorage.getItem(sessionConfig.localStorage.currentBills)!);
 
         this.selectedBills = currentBillObj.bills;
-        this.income = currentBillObj.income;
-        this.spent = currentBillObj.spent;
+        this.currentMoney = currentBillObj.income;
+        this.moneySpent = currentBillObj.spent;
 
         this.selectedBills.forEach((bill: Bill) => {
           bill.saved = true;
@@ -130,8 +131,8 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
   saveBills() {
     let currentBillObj: CurrentBillConfig = {
-      income: this.income,
-      spent: this.spent,
+      income: this.currentMoney,
+      spent: this.moneySpent,
       bills: []
     }
 
