@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { DatabaseService } from './services/database.service';
 import { sessionConfig } from './configs/session.config';
 
 @Component({
@@ -10,20 +9,11 @@ import { sessionConfig } from './configs/session.config';
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
-export class AppComponent implements OnInit {
+export class AppComponent {
   title = 'budget-app';
 
   constructor(
-    private databaseService: DatabaseService
   ) {}
 
-  ngOnInit(): void {
-    if (!sessionStorage.getItem(sessionConfig.dbAccessToken)) {
-      this.databaseService.auth().subscribe((response: any) => {
-        sessionStorage.setItem(sessionConfig.dbAccessToken, response?.access_token);
-        sessionStorage.setItem(sessionConfig.dbRefreshToken, response?.refresh_token);
-      });
-    }
 
-  }
 }

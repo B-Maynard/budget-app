@@ -1,60 +1,66 @@
 <div class="main-page-wrapper">
-    <p-toast />
-    <p-confirmDialog />
-    <div class="main-page-container">
-      <div class="header">
-        <div class="input-box">
-            <div class="sub-header-text">
-                Income
-            </div>
-            <input class="income-input" type="number" pInputText [(ngModel)]="income" />
-        </div>
-        <hr>
-        <div class="input-box">
-            <div class="sub-header-text">
-                Spent
-            </div>
-            <input class="income-input" type="number" pInputText [(ngModel)]="spent" />
-        </div>
-        <hr>
-        <div class="total-money-left">
-            <div class="sub-header-text">
-                Total Left
-            </div>
-            <div class="total">
-                {{income - (spent + billTotal)}}
-            </div>
-        </div>
-      </div>
-      <div class="current-bills">
-        <div class="buttons">
-            <p-button (onClick)="confirmClear($event)" size="small" label="Clear Bills" severity="danger"/>
-            <p-button (onClick)="saveBills()" size="small" label="Save Bills" severity="success"/>
-            <p-button (onClick)="addBill()" size="small" label="Add Bill" />
-        </div>
-        <div *ngFor="let bill of selectedBills">
-            <div class="bill">
-                <div class="remove-bill">
-                    <p-button (onClick)="removeBill(bill.index)" icon="bx bx-x" [rounded]="true" severity="danger" size="small" />
+    <div *ngIf="hasAuthToken">
+        <p-toast />
+        <p-confirmDialog />
+        <div class="main-page-container">
+          <div class="header">
+            <div class="input-box">
+                <div class="sub-header-text">
+                    Income
                 </div>
-                <div class="bill-name">
-                        <p-dropdown *ngIf="!bill.saved"
-                        [style]="{'max-width': '200px'}"
-                        autoWidth="false"
-                        [options]="bills" 
-                        (onChange)="onBillChange($event, bill.index)"
-                        optionLabel="name"
-                        placeholder="Select a bill..."
-                        [filter]="true"
-                        filterBy="name"
-                    />
-                    <input *ngIf="bill.saved" [disabled]="true" class="bill-name-input" type="text" pInputText  [ngModel]="bill.name"/>
+                <input class="income-input" type="number" pInputText [(ngModel)]="income" />
+            </div>
+            <hr>
+            <div class="input-box">
+                <div class="sub-header-text">
+                    Spent
                 </div>
-                <div class="bill-price">
-                    {{bill?.price}}
+                <input class="income-input" type="number" pInputText [(ngModel)]="spent" />
+            </div>
+            <hr>
+            <div class="total-money-left">
+                <div class="sub-header-text">
+                    Total Left
+                </div>
+                <div class="total">
+                    {{income - (spent + billTotal)}}
                 </div>
             </div>
+          </div>
+          <div class="current-bills">
+            <div class="buttons">
+                <p-button (onClick)="confirmClear($event)" size="small" label="Clear Bills" severity="danger"/>
+                <p-button (onClick)="saveBills()" size="small" label="Save Bills" severity="success"/>
+                <p-button (onClick)="addBill()" size="small" label="Add Bill" />
+            </div>
+            <div *ngFor="let bill of selectedBills">
+                <div class="bill">
+                    <div class="remove-bill">
+                        <p-button (onClick)="removeBill(bill.index)" icon="bx bx-x" [rounded]="true" severity="danger" size="small" />
+                    </div>
+                    <div class="bill-name">
+                            <p-dropdown *ngIf="!bill.saved"
+                            [style]="{'max-width': '200px'}"
+                            autoWidth="false"
+                            [options]="bills" 
+                            (onChange)="onBillChange($event, bill.index)"
+                            optionLabel="name"
+                            placeholder="Select a bill..."
+                            [filter]="true"
+                            filterBy="name"
+                        />
+                        <input *ngIf="bill.saved" [disabled]="true" class="bill-name-input" type="text" pInputText  [ngModel]="bill.name"/>
+                    </div>
+                    <div class="bill-price">
+                        {{bill?.price}}
+                    </div>
+                </div>
+            </div>
+          </div>
         </div>
-      </div>
     </div>
-  </div>
+    <div *ngIf="!hasAuthToken">
+        <input type="text" pInputText [(ngModel)]="authToken"/>
+        <p-button (onClick)="saveToken()" size="small" label="Save Token" />
+    </div>
+</div>

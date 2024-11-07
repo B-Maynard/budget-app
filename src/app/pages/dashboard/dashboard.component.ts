@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, OnInit, QueryList, ViewChildren } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { Dropdown, DropdownModule } from 'primeng/dropdown';
@@ -10,6 +10,7 @@ import { ToastModule } from 'primeng/toast';
 import { BillsService } from '../../services/bills.service';
 import { sessionConfig } from '../../configs/session.config';
 import { Bill, CurrentBillConfig } from './dashboard.interface';
+import { BehaviorSubject, catchError, concatMap, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard',
@@ -31,7 +32,7 @@ import { Bill, CurrentBillConfig } from './dashboard.interface';
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
-export class DashboardComponent implements OnInit, AfterViewInit {
+export class DashboardComponent implements OnInit, OnDestroy {
 
   public income: number = 0;
   public spent: number = 0;
@@ -40,33 +41,67 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
   public selectedBills: any[] = [];
 
+  private startupSub: Subscription | undefined | null = null;
+
+  public hasAuthToken: boolean = false;
+  public authToken: string | null = null;
+
   constructor(
     private confirmationService: ConfirmationService,
     private messageService: MessageService,
     private billsService: BillsService
   ) { }
 
-  ngOnInit(): void {
-    this.billsService.getBills().subscribe((response: any) => {
-      this.bills = response;
-
-      if (localStorage.getItem(sessionConfig.localStorage.currentBills)) {
-        let currentBillObj = JSON.parse(localStorage.getItem(sessionConfig.localStorage.currentBills)!);
-
-        this.selectedBills = currentBillObj.bills;
-        this.income = currentBillObj.income;
-        this.spent = currentBillObj.spent;
-
-        this.selectedBills.forEach((bill: Bill) => {
-          bill.saved = true;
-          this.billTotal += bill.price;
-        })
-      }
-    });
+  ngOnDestroy(): void {
+    this.startupSub?.unsubscribe();
   }
 
-  ngAfterViewInit(): void {
-    console.log("test");
+  ngOnInit(): void {
+    this.runStartup().subscribe();
+  }
+
+  private runStartup() {
+    if (sessionStorage.getItem(sessionConfig.dbAccessToken)) {
+      this.authToken = sessionStorage.getItem(sessionConfig.dbAccessToken);
+
+      return this.billsService.getBills(this.authToken!).pipe(
+        concatMap((response: any) => {
+          this.bills = response;
+
+          if (localStorage.getItem(sessionConfig.localStorage.currentBills)) {
+            let currentBillObj = JSON.parse(localStorage.getItem(sessionConfig.localStorage.currentBills)!);
+    
+            this.selectedBills = currentBillObj.bills;
+            this.income = currentBillObj.income;
+            this.spent = currentBillObj.spent;
+    
+            this.selectedBills.forEach((bill: Bill) => {
+              bill.saved = true;
+              this.billTotal += bill.price;
+            })
+          }
+          this.hasAuthToken = true;
+          return new BehaviorSubject<boolean>(true);
+        }),
+        catchError(err => {
+          this.hasAuthToken = false;
+          this.authToken = null;
+          sessionStorage.removeItem(sessionConfig.dbAccessToken);
+          console.log(err);
+          return new BehaviorSubject<boolean>(false);
+        })
+      );
+    }
+
+    return new BehaviorSubject<boolean>(false);
+
+  }
+
+  saveToken() {
+    if (this.authToken) {
+      sessionStorage.setItem(sessionConfig.dbAccessToken, this.authToken!);
+      this.runStartup().subscribe();
+    }
   }
 
   onBillChange($event: any, index: number) {
