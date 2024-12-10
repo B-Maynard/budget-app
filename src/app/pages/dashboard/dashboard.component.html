@@ -60,7 +60,13 @@
         </div>
     </div>
     <div *ngIf="!hasAuthToken">
-        <input type="text" pInputText [(ngModel)]="authToken"/>
-        <p-button (onClick)="saveToken()" size="small" label="Save Token" />
+        <div class="landing-page">
+            <p-card class="token-card" header="Enter Access Token">
+                <div class="token-card-content">
+                    <input type="text" pInputText [(ngModel)]="authToken"/>
+                    <p-button (onClick)="saveToken()" size="small" label="Save Token" />
+                </div>
+            </p-card>
+        </div>
     </div>
 </div>

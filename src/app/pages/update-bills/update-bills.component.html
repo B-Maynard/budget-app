@@ -1,0 +1,66 @@
+<div class="update-bills-wrapper">
+    <div class="update-bills-container">
+        <div class="buttons">
+            <p-button>
+                New Bill
+            </p-button>
+        </div>
+        <div class="table">
+            <p-table [value]="bills" styleClass="p-datatable-gridlines" [tableStyle]="{ 'min-width': '50rem' }">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>Name</th>
+                        <th>Price</th>
+                        <th>Date</th>
+                        <th></th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-bill let-editing="editing">
+                    <tr>
+                        <td [pEditableColumn]="bill?.name" pEditableColumnField="name">
+                            <p-cellEditor>
+                                <ng-template pTemplate="input">
+                                    <input 
+                                        pInputText type="text" 
+                                        [(ngModel)]="bill.name" />
+                                </ng-template>
+                                <ng-template pTemplate="output">
+                                    {{ bill?.name }}
+                                </ng-template>
+                            </p-cellEditor>
+                        </td>
+                        <td [pEditableColumn]="bill?.price" pEditableColumnField="price">
+                            <p-cellEditor>
+                                <ng-template pTemplate="input">
+                                    <input 
+                                        pInputText type="text" 
+                                        [(ngModel)]="bill.price" />
+                                </ng-template>
+                                <ng-template pTemplate="output">
+                                    {{ bill?.price }}
+                                </ng-template>
+                            </p-cellEditor>
+                        </td>
+                        <td [pEditableColumn]="bill?.date" pEditableColumnField="date">
+                            <p-cellEditor>
+                                <ng-template pTemplate="input">
+                                    <input 
+                                        pInputText type="text" 
+                                        [(ngModel)]="bill.date" />
+                                </ng-template>
+                                <ng-template pTemplate="output">
+                                    {{ bill?.date }}
+                                </ng-template>
+                            </p-cellEditor>
+                        </td>
+                        <td>
+                            <p-button (click)="save(bill)">
+                                Save
+                            </p-button>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+    </div>
+</div>

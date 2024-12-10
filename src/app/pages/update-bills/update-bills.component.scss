@@ -1,0 +1,14 @@
+.update-bills-wrapper {
+
+    .update-bills-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+
+        .buttons {
+            margin-top: 20px;
+        }
+    }
+}

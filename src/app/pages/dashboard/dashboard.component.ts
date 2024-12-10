@@ -11,6 +11,7 @@ import { BillsService } from '../../services/bills.service';
 import { sessionConfig } from '../../configs/session.config';
 import { Bill, CurrentBillConfig } from './dashboard.interface';
 import { BehaviorSubject, catchError, concatMap, Subscription } from 'rxjs';
+import { CardModule } from 'primeng/card';
 
 @Component({
   selector: 'app-dashboard',
@@ -23,7 +24,8 @@ import { BehaviorSubject, catchError, concatMap, Subscription } from 'rxjs';
     ReactiveFormsModule,
     ButtonModule,
     ConfirmDialogModule,
-    ToastModule
+    ToastModule,
+    CardModule
   ],
   providers: [
     ConfirmationService,
