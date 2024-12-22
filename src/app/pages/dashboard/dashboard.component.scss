@@ -1,86 +1,99 @@
 .main-page-wrapper {
 
-    .main-page-container {
-        width: 98%;
+    .table {
+        border-radius: 5px;
+        width: 99%;
+        display: flex;
+        flex-direction: column;
+        background-color: white;
+        color: black;
+        padding: 10px;
         margin: 0 auto;
+        margin-bottom: 20px;
 
-        .header {
+        .input-row, .data-row {
             display: flex;
-            width: 100%;
-            padding-bottom: 5px;
-            border-bottom: 1px solid white;
+            justify-content: space-between;
+            align-items: center;
 
-            .input-box {
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-
-                .income-input {
-                    width: 100px;
-                }
-            }
-
-            .total-money-left {
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-            }
-
-            hr {
-                width: 0;
-                border: 1px solid white;
+            .title {
+                font-weight: bold;
             }
         }
 
-        .current-bills {
-            .buttons {
+        .input-row > input {
+            width: 100px;
+        }
+
+        hr {
+            width: 100%;
+            color: black;
+        }
+    }
+
+    .current-bills {
+        .buttons {
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+            margin-top: 5px;
+            margin-bottom: 20px;
+        }
+
+        .bill {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+
+            .remove-bill {
+                flex: 1;
                 display: flex;
-                justify-content: space-evenly;
-                align-items: center;
-                margin-top: 5px;
-                margin-bottom: 20px;
-            }
-
-            .bill {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 10px;
-
-                .remove-bill {
-                    flex: 1;
-                    display: flex;
-                    justify-content: flex-start;
-                }
-
-                .bill-name {
-                    flex: 2;
-                    display: flex;
-                    justify-content: center;
-                }
-
-                .bill-price {
-                    flex: 1;
-                    display: flex;
-                    justify-content: flex-end;
-                }
+                justify-content: flex-start;
             }
 
             .bill-name {
+                flex: 2;
+                display: flex;
+                justify-content: center;
+            }
 
-                .bill-select {
-                    width: 150px;
-                    height: 40px;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                }
+            .bill-price {
+                flex: 1;
+                display: flex;
+                justify-content: flex-end;
+            }
+
+            .bill-name-input {
+                width: 200px;
             }
         }
     }
 
     .sub-header-text {
         font-size: 1.5em;
+    }
+
+    .landing-page {
+
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+
+        .token-card {
+            margin-top: 10px;
+
+            .token-card-content {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 30px;
+            }
+        }
+
+
     }
 }
