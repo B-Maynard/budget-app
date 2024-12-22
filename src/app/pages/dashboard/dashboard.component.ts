@@ -39,6 +39,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public income: number = 0;
   public spent: number = 0;
   public billTotal: number = 0;
+  public spendingOffset: number = 0;
+  public purchase: number | null = 0;
+  public purchaseTotal: number = 0;
+
   public bills: any[] = [];
 
   public selectedBills: any[] = [];
@@ -76,6 +80,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
             this.selectedBills = currentBillObj.bills;
             this.income = currentBillObj.income;
             this.spent = currentBillObj.spent;
+            this.spendingOffset = currentBillObj.spendingOffset;
+            this.purchaseTotal = currentBillObj.purchaseTotal;
     
             this.selectedBills.forEach((bill: Bill) => {
               bill.saved = true;
@@ -144,12 +150,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
   clearBills() {
     this.selectedBills = [];
     this.billTotal = 0;
+    this.purchaseTotal = 0;
+    this.spendingOffset = 0;
   }
 
   confirmClear($event: Event) {
     this.confirmationService.confirm({
       target: $event.target as EventTarget,
-      message: 'Are you sure you want to clear bills?',
+      message: 'Are you sure you want to clear current configuration?',
       header: 'Confirmation',
       icon: 'bx bxs-error-alt',
       acceptIcon: "none",
@@ -169,6 +177,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     let currentBillObj: CurrentBillConfig = {
       income: this.income,
       spent: this.spent,
+      spendingOffset: this.spendingOffset,
+      purchaseTotal: this.purchaseTotal,
       bills: []
     }
 
@@ -178,6 +188,38 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     localStorage.setItem(sessionConfig.localStorage.currentBills, JSON.stringify(currentBillObj));
     this.messageService.add({ severity: 'info', summary: 'Saved', detail: 'Bills have been saved' });
+  }
+
+  addPurchase() {
+    if (this.purchase) {
+      this.purchaseTotal += this.purchase;
+    }
+    
+    this.purchase = null;
+  }
+
+  confirmClearPuchases($event: Event) {
+    this.confirmationService.confirm({
+      target: $event.target as EventTarget,
+      message: 'Are you sure you want to clear purchases and offset?',
+      header: 'Confirmation',
+      icon: 'bx bxs-error-alt',
+      acceptIcon: "none",
+      rejectIcon: "none",
+      rejectButtonStyleClass: "p-button-text",
+      accept: () => {
+        this.clearPurchasesAndOffset();
+        this.messageService.add({ severity: 'info', summary: 'Cleared', detail: 'Bills have been cleared' });
+      },
+      reject: () => {
+        return;
+      }
+    });
+  }
+
+  clearPurchasesAndOffset() {
+    this.purchaseTotal = 0;
+    this.spendingOffset = 0;
   }
 
 }

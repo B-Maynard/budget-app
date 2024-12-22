@@ -7,5 +7,7 @@ export interface Bill {
 export interface CurrentBillConfig {
     income: number;
     spent: number;
+    spendingOffset: number;
+    purchaseTotal: number;
     bills: Bill[];
 }
