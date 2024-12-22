@@ -1,33 +1,46 @@
 <div class="main-page-wrapper">
     <div *ngIf="hasAuthToken">
+
         <p-toast />
         <p-confirmDialog />
-        <div class="main-page-container">
-          <div class="header">
-            <div class="input-box">
-                <div class="sub-header-text">
+
+        <div class="table">
+            <div class="input-row">
+                <div class="title">
                     Income
                 </div>
-                <input class="income-input" type="number" pInputText [(ngModel)]="income" />
+                <input class="input" type="number" pInputText [(ngModel)]="income" />
             </div>
-            <hr>
-            <div class="input-box">
-                <div class="sub-header-text">
-                    Spent
+            <hr />
+            <div class="input-row">
+                <div class="title">
+                    Current CC Balance
                 </div>
-                <input class="income-input" type="number" pInputText [(ngModel)]="spent" />
+                <input class="input" type="number" pInputText [(ngModel)]="spent" />
             </div>
-            <hr>
-            <div class="total-money-left">
-                <div class="sub-header-text">
-                    Total Left
+            <hr />
+            <div class="data-row">
+                <div class="title">
+                    Bill Total
                 </div>
-                <div class="total">
-                    {{income - (spent + billTotal)}}
-                </div>
+                <div class="data">{{billTotal}}</div>
             </div>
-          </div>
-          <div class="current-bills">
+            <hr />
+            <div class="data-row">
+                <div class="title">
+                    Debt
+                </div>
+                <div class="data">{{income - (spent + billTotal)}}</div>
+            </div>
+            <hr />
+            <div class="data-row">
+                <div class="title">
+                    Money Available
+                </div>
+                <div class="data">{{income - billTotal}}</div>
+            </div>
+        </div>
+        <div class="current-bills">
             <div class="buttons">
                 <p-button (onClick)="confirmClear($event)" size="small" label="Clear Bills" severity="danger"/>
                 <p-button (onClick)="saveBills()" size="small" label="Save Bills" severity="success"/>
@@ -40,7 +53,7 @@
                     </div>
                     <div class="bill-name">
                             <p-dropdown *ngIf="!bill.saved"
-                            [style]="{'max-width': '200px'}"
+                            [style]="{'max-width': '150px'}"
                             autoWidth="false"
                             [options]="bills" 
                             (onChange)="onBillChange($event, bill.index)"
@@ -56,7 +69,6 @@
                     </div>
                 </div>
             </div>
-          </div>
         </div>
     </div>
     <div *ngIf="!hasAuthToken">
