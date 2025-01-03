@@ -10,5 +10,42 @@
         .buttons {
             margin-top: 20px;
         }
+
+        .bill-wrapper, .new-bill-wrapper {
+
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+
+            .bill-container {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                align-items: center;
+                justify-content: space-between;
+                width: 100%;
+    
+                .bill-content {
+                    display: flex;
+                    gap: 25px;
+    
+                    .input {
+                        max-width: 100px;
+                        width: 100px;
+                    }
+
+                    .new-bill-input {
+                        max-width: 150px;
+                        width: 150px;
+                    }
+                }
+            }
+        }
+
+        .new-bill-wrapper {
+            padding: 20px;
+            background-color: white;
+            border-radius: 5px;
+        }
     }
 }
