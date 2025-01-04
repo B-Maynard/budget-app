@@ -1,4 +1,6 @@
 <div class="update-bills-wrapper">
+    <p-toast />
+
     <div class="update-bills-container">
         <div class="buttons">
             <p-button (onClick)="showNewBill()">New Bill</p-button>
@@ -14,10 +16,10 @@
         </div>
         <div class="bill-wrapper">
             <div class="bill-container" *ngFor="let bill of bills">
-                <div class="bill-header">{{bill?.name}}</div>
+                <input #billName [id]="bill._id" class="bill-header input" pInputText [value]="bill.name"/>
                 <div class="bill-content">
-                    <input #billInput [id]="bill._id" class="input" type="number" pInputText [value]="bill.price"/>
-                    <p-button class="save-button" size="small" label="Save" />
+                    <input #billPrice [id]="bill._id" class="input" type="number" pInputText [value]="bill.price"/>
+                    <p-button (onClick)="save(bill._id)" class="save-button" size="small" label="Save" />
                 </div>
             </div>
         </div>

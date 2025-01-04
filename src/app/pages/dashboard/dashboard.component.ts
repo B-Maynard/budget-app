@@ -12,6 +12,7 @@ import { sessionConfig } from '../../configs/session.config';
 import { Bill, CurrentBillConfig } from './dashboard.interface';
 import { BehaviorSubject, catchError, concatMap, Subscription } from 'rxjs';
 import { CardModule } from 'primeng/card';
+import { CookieService } from 'ngx-cookie-service';
 
 @Component({
   selector: 'app-dashboard',
@@ -55,7 +56,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   constructor(
     private confirmationService: ConfirmationService,
     private messageService: MessageService,
-    private billsService: BillsService
+    private billsService: BillsService,
+    private cookieService: CookieService
   ) { }
 
   ngOnDestroy(): void {
@@ -67,8 +69,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private runStartup() {
-    if (sessionStorage.getItem(sessionConfig.dbAccessToken)) {
-      this.authToken = sessionStorage.getItem(sessionConfig.dbAccessToken);
+    if (this.cookieService.check(sessionConfig.dbAccessToken)) {
+      this.authToken = this.cookieService.get(sessionConfig.dbAccessToken);
 
       return this.billsService.getBills(this.authToken!).pipe(
         concatMap((response: any) => {
@@ -107,7 +109,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   saveToken() {
     if (this.authToken) {
-      sessionStorage.setItem(sessionConfig.dbAccessToken, this.authToken!);
+      this.cookieService.set(sessionConfig.dbAccessToken, this.authToken!);
       this.runStartup().subscribe();
     }
   }

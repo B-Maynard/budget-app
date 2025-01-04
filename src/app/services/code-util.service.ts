@@ -20,4 +20,12 @@ export class CodeUtil {
         return null;
     }
 
+    isStringNullOrEmpty(str: string) {
+        if (str === null || str === undefined || str === "") {
+            return true;
+        }
+
+        return false;
+    }
+
 }
