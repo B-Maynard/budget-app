@@ -7,6 +7,7 @@ export const sessionConfig = {
 
     // local storage
     localStorage: {
-        currentBills: "currentBillsConfig"
+        currentBills: "currentBillsConfig",
+        currentPurchases: "currentPurchases"
     }
 };

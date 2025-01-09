@@ -11,6 +11,25 @@
         margin: 0 auto;
         margin-bottom: 20px;
 
+        .purchase-table {
+            border: 1px solid #9e9e9e;
+            border-radius: 5px;
+            padding-left: 20px;
+            padding-right: 20px;
+            padding-top: 5px;
+            padding-bottom: 5px;
+
+            .data-row {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+    
+                .title {
+                    font-weight: bold;
+                }
+            }
+        }
+
         .input-row, .data-row {
             display: flex;
             justify-content: space-between;

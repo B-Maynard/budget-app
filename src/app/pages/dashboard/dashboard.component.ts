@@ -41,8 +41,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public spent: number = 0;
   public billTotal: number = 0;
   public spendingOffset: number = 0;
+
   public purchase: number | null = 0;
+  public purchaseName: string | null = '';
   public purchaseTotal: number = 0;
+  public currentPurchases: any[] = [];
 
   public bills: any[] = [];
 
@@ -88,8 +91,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
             this.selectedBills.forEach((bill: Bill) => {
               bill.saved = true;
               this.billTotal += bill.price;
-            })
+            });
           }
+
+          if (localStorage.getItem(sessionConfig.localStorage.currentPurchases)) {
+            let currentPurchasesObj = JSON.parse(localStorage.getItem(sessionConfig.localStorage.currentPurchases)!);
+            this.currentPurchases = currentPurchasesObj;
+          }
+
           this.hasAuthToken = true;
           return new BehaviorSubject<boolean>(true);
         }),
@@ -193,10 +202,19 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   addPurchase() {
+
+    let tempPurchase = {
+      name: this.purchaseName,
+      price: this.purchase
+    }
+
+    this.currentPurchases.unshift(tempPurchase);
+
     if (this.purchase) {
       this.purchaseTotal += this.purchase;
     }
-    
+
+    localStorage.setItem(sessionConfig.localStorage.currentPurchases, JSON.stringify(this.currentPurchases));
     this.purchase = null;
   }
 
@@ -222,6 +240,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   clearPurchasesAndOffset() {
     this.purchaseTotal = 0;
     this.spendingOffset = 0;
+    this.purchaseName = '';
+
+    this.currentPurchases = [];
+    localStorage.setItem(sessionConfig.localStorage.currentPurchases, '');
   }
 
 }

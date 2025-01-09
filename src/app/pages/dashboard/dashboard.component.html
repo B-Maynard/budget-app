@@ -39,6 +39,15 @@
                 </div>
                 <div class="data">{{(income + spendingOffset) - (billTotal + purchaseTotal)}}</div>
             </div>
+            <div *ngIf="currentPurchases.length > 0" class="purchase-table">
+                <div class="data-row" *ngFor="let item of currentPurchases">
+                    <div class="title">
+                        {{item?.name}}
+                    </div>
+                    <div class="data">{{item?.price}}</div>
+                </div>
+            </div>
+
         </div>
         <div class="current-bills">
             <div class="extras">
@@ -53,6 +62,12 @@
                         Add New Purchase
                     </div>
                     <input class="input" type="number" pInputText [(ngModel)]="purchase" />
+                </div>
+                <div class="extra-container">
+                    <div class="title">
+                        Purchase Name
+                    </div>
+                    <input class="input" type="text" pInputText [(ngModel)]="purchaseName" />
                 </div>
                 <div class="extra-container">
                     <p-button (onClick)="addPurchase()" size="small" label="Add" />
