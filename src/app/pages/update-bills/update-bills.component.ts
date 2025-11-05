@@ -9,7 +9,6 @@ import { SpinnerService } from '../../services/spinner.service';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { BehaviorSubject, catchError, concatMap } from 'rxjs';
-import { CookieService } from 'ngx-cookie-service';
 import { CodeUtil } from '../../services/code-util.service';
 
 @Component({
@@ -48,12 +47,11 @@ export class UpdateBillsComponent implements OnInit, AfterViewInit {
     private billService: BillsService,
     private spinnerService: SpinnerService,
     private messageService: MessageService,
-    private cookieService: CookieService,
     private codeUtil: CodeUtil
   ) {}
 
   ngOnInit(): void {
-    this.authToken = this.cookieService.get(sessionConfig.dbAccessToken);
+    this.authToken = localStorage.getItem(sessionConfig.dbAccessToken);
     if (this.authToken) {
       this.billService.getBills(this.authToken).subscribe((response: any) => {
         this.bills = response;

@@ -109,7 +109,7 @@
         <div class="landing-page">
             <p-card class="token-card" header="Enter Access Token">
                 <div class="token-card-content">
-                    <input type="text" pInputText [(ngModel)]="authToken"/>
+                    <p-password [(ngModel)]="authToken" [feedback]="false" />
                     <p-button (onClick)="saveToken()" size="small" label="Save Token" />
                 </div>
             </p-card>

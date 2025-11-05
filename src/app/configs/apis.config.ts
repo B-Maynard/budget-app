@@ -4,6 +4,6 @@ export const apiConfig = {
     // databaseRootPath: "http://localhost:3000",
     databaseRootPath: "https://budget-app-backend-xdje.onrender.com",
 
-    // bils
+    // bills
     getBills: "/bills",
 };

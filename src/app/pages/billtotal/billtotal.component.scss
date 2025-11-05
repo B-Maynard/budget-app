@@ -1,0 +1,60 @@
+.bill-total-wrapper {
+    display: flex;
+    flex-direction: column;
+
+    .bill-total-container {
+        display: flex;
+        flex-direction: column;
+        padding: 20px;
+        gap: 40px;
+
+        .calculations {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .input-fields {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            gap: 20px;
+
+            .input-container {
+                display: flex;
+                flex-direction: column;
+            }
+        }
+
+        .buttons {
+            display: flex;
+            gap: 20px;
+        }
+
+        .bill-wrapper {
+            display: flex;
+            justify-content: space-evenly;
+
+            .current-bills-wrapper, .chosen-bills-wrapper {
+                background-color: white;
+                color: black;
+                border-radius: 5px;
+                padding: 20px;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+                align-items: flex-start;
+                gap: 10px;
+                min-width: 300px;
+
+                .bill-data {
+                    background-color: lightgray;
+                    padding: 5px;
+                    border-radius: 5px;
+                    cursor: pointer;
+                }
+            }
+        }
+    }
+}
