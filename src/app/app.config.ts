@@ -5,6 +5,7 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import { routes } from './app.routes';
 import { provideHttpClient, withInterceptors, withInterceptorsFromDi } from '@angular/common/http';
 import { genericInterceptor } from './intercepters/generic.interceptor';
+import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -12,6 +13,7 @@ export const appConfig: ApplicationConfig = {
     provideAnimations(),
     provideHttpClient(
       withInterceptorsFromDi(),
-      withInterceptors([genericInterceptor]))
+      withInterceptors([genericInterceptor])),
+    {provide: LocationStrategy, useClass: HashLocationStrategy}
   ]
 };
