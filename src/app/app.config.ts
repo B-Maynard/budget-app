@@ -6,6 +6,8 @@ import { routes } from './app.routes';
 import { provideHttpClient, withInterceptors, withInterceptorsFromDi } from '@angular/common/http';
 import { genericInterceptor } from './intercepters/generic.interceptor';
 import { HashLocationStrategy, LocationStrategy } from '@angular/common';
+import { providePrimeNG } from 'primeng/config';
+import Aura from '@primeng/themes/aura';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -14,6 +16,11 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(
       withInterceptorsFromDi(),
       withInterceptors([genericInterceptor])),
-    {provide: LocationStrategy, useClass: HashLocationStrategy}
+    {provide: LocationStrategy, useClass: HashLocationStrategy},
+    providePrimeNG({
+      theme: {
+          preset: Aura
+      }
+    })
   ]
 };

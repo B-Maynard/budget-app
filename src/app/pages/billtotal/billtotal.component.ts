@@ -4,7 +4,7 @@ import { SpinnerService } from '../../services/spinner.service';
 import { sessionConfig } from '../../configs/session.config';
 import { BehaviorSubject, catchError, concatMap } from 'rxjs';
 import { ButtonModule } from 'primeng/button';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TableModule } from 'primeng/table';
 import { ToastModule } from 'primeng/toast';
@@ -14,7 +14,6 @@ import { InputTextModule } from 'primeng/inputtext';
   selector: 'app-billtotal',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     TableModule,
     ButtonModule,
@@ -22,7 +21,7 @@ import { InputTextModule } from 'primeng/inputtext';
     FormsModule,
     ToastModule,
     InputTextModule
-  ],
+],
   templateUrl: './billtotal.component.html',
   styleUrl: './billtotal.component.scss'
 })

@@ -1,3 +1,5 @@
-<div *ngIf="(spinnerService.isLoading$ | async)" class="progress-bar-container">
+@if ((spinnerService.isLoading$ | async)) {
+  <div class="progress-bar-container">
     <p-progressSpinner ariaLabel="loading" />
-</div>
+  </div>
+}

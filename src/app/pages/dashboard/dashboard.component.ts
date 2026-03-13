@@ -1,8 +1,8 @@
-import { CommonModule } from '@angular/common';
+
 import { AfterViewInit, Component, OnDestroy, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
-import { Dropdown, DropdownModule } from 'primeng/dropdown';
+import { Select, SelectModule } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
@@ -20,15 +20,14 @@ import { PasswordModule } from 'primeng/password';
   imports: [
     InputTextModule,
     PasswordModule,
-    CommonModule,
     FormsModule,
-    DropdownModule,
+    SelectModule,
     ReactiveFormsModule,
     ButtonModule,
     ConfirmDialogModule,
     ToastModule,
     CardModule
-  ],
+],
   providers: [
     ConfirmationService,
     MessageService

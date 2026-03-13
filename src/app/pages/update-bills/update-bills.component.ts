@@ -3,7 +3,7 @@ import { TableModule } from 'primeng/table';
 import { BillsService } from '../../services/bills.service';
 import { sessionConfig } from '../../configs/session.config';
 import { ButtonModule } from 'primeng/button';
-import { CommonModule, KeyValue } from '@angular/common';
+import { KeyValue } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SpinnerService } from '../../services/spinner.service';
 import { ToastModule } from 'primeng/toast';
@@ -15,14 +15,13 @@ import { CodeUtil } from '../../services/code-util.service';
   selector: 'app-update-bills',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     TableModule,
     ButtonModule,
     ReactiveFormsModule,
     FormsModule,
     ToastModule
-  ],
+],
   providers: [
     MessageService
   ],

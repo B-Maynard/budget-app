@@ -1,47 +1,51 @@
 <div class="bill-total-wrapper">
-    <div class="bill-total-container">
-        <div class="input-fields">
-            <div class="input-container">
-                <label for="baileyIncome">Bailey Income</label>
-                <input id="baileyIncome" class="input" type="number" pInputText [(ngModel)]="baileyIncome" />
-            </div>
-            <div class="input-container">
-                <label for="imariIncome">Imari Income</label>
-                <input id="imariIncome" class="input" type="number" pInputText [(ngModel)]="imariIncome" />
-            </div>
-            <div class="input-container">
-                <label for="extras">Extras</label>
-                <input id="extras" class="input" type="number" pInputText [(ngModel)]="extras" />
-            </div>
-        </div>
-        <div class="calculations">
-            <div>
-                Bill Total: {{ billTotal() }}
-            </div>
-            <div>
-                Total Left After Bills: {{(imariIncome + baileyIncome) - billTotal()}}
-            </div>
-            
-        </div>
-        <div class="buttons">
-            <p-button (onClick)="addAllCurrentBills()" size="small" label="Add All" />
-            <p-button (onClick)="removeAllChosenBills()"severity="danger" size="small" label="Remove All" />
-        </div>
-        <div class="bill-wrapper">
-            <div class="current-bills-wrapper">
-                <div class="current-bills-container" *ngFor="let bill of currentBills">
-                    <div (click)="currentBillClick(bill)" class="bill-data">
-                        {{bill.name}} {{bill.price}}
-                    </div>
-                </div>
-            </div>
-            <div class="chosen-bills-wrapper">
-                <div class="chosen-bills-container" *ngFor="let bill of chosenBills">
-                    <div (click)="chosenBillClick(bill)" class="bill-data">
-                        {{bill?.name}} {{bill?.price}}
-                    </div>
-                </div>
-            </div>
-        </div>
+  <div class="bill-total-container">
+    <div class="input-fields">
+      <div class="input-container">
+        <label for="baileyIncome">Bailey Income</label>
+        <input id="baileyIncome" class="input" type="number" pInputText [(ngModel)]="baileyIncome" />
+      </div>
+      <div class="input-container">
+        <label for="imariIncome">Imari Income</label>
+        <input id="imariIncome" class="input" type="number" pInputText [(ngModel)]="imariIncome" />
+      </div>
+      <div class="input-container">
+        <label for="extras">Extras</label>
+        <input id="extras" class="input" type="number" pInputText [(ngModel)]="extras" />
+      </div>
     </div>
+    <div class="calculations">
+      <div>
+        Bill Total: {{ billTotal() }}
+      </div>
+      <div>
+        Total Left After Bills: {{(imariIncome + baileyIncome) - billTotal()}}
+      </div>
+
+    </div>
+    <div class="buttons">
+      <p-button (onClick)="addAllCurrentBills()" size="small" label="Add All" />
+      <p-button (onClick)="removeAllChosenBills()"severity="danger" size="small" label="Remove All" />
+    </div>
+    <div class="bill-wrapper">
+      <div class="current-bills-wrapper">
+        @for (bill of currentBills; track bill) {
+          <div class="current-bills-container">
+            <div (click)="currentBillClick(bill)" class="bill-data">
+              {{bill.name}} {{bill.price}}
+            </div>
+          </div>
+        }
+      </div>
+      <div class="chosen-bills-wrapper">
+        @for (bill of chosenBills; track bill) {
+          <div class="chosen-bills-container">
+            <div (click)="chosenBillClick(bill)" class="bill-data">
+              {{bill?.name}} {{bill?.price}}
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
 </div>
