@@ -12,6 +12,8 @@ import { sessionConfig } from '../../configs/session.config';
 import { Bill, CurrentBillConfig } from './dashboard.interface';
 import { BehaviorSubject, catchError, concatMap, Subscription } from 'rxjs';
 import { CardModule } from 'primeng/card';
+import { DividerModule } from 'primeng/divider';
+import { CurrencyPipe } from '@angular/common';
 import { PasswordModule } from 'primeng/password';
 
 @Component({
@@ -26,7 +28,9 @@ import { PasswordModule } from 'primeng/password';
     ButtonModule,
     ConfirmDialogModule,
     ToastModule,
-    CardModule
+    CardModule,
+    DividerModule,
+    CurrencyPipe
 ],
   providers: [
     ConfirmationService,

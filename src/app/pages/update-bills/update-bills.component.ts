@@ -1,4 +1,6 @@
 import { AfterViewInit, Component, ElementRef, OnInit, QueryList, ViewChildren, ViewContainerRef } from '@angular/core';
+import { CardModule } from 'primeng/card';
+import { DividerModule } from 'primeng/divider';
 import { TableModule } from 'primeng/table';
 import { BillsService } from '../../services/bills.service';
 import { sessionConfig } from '../../configs/session.config';
@@ -20,7 +22,9 @@ import { CodeUtil } from '../../services/code-util.service';
     ButtonModule,
     ReactiveFormsModule,
     FormsModule,
-    ToastModule
+    ToastModule,
+    CardModule,
+    DividerModule
 ],
   providers: [
     MessageService

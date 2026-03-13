@@ -1,60 +1,225 @@
-.bill-total-wrapper {
-    display: flex;
-    flex-direction: column;
+/* Variables */
+$border-radius: 12px;
+$card-bg: #1e1e1e;
+$card-border: 1px solid rgba(255, 255, 255, 0.05);
+$shadow-color: rgba(0, 0, 0, 0.4);
 
-    .bill-total-container {
-        display: flex;
-        flex-direction: column;
-        padding: 20px;
-        gap: 40px;
+/* Utility overrides for PrimeNG */
+::ng-deep .w-full { width: 100% !important; }
+::ng-deep .mb-4 { margin-bottom: 1rem !important; }
+::ng-deep .flex-1 { flex: 1 !important; }
 
-        .calculations {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
+/* The dashboard-wrapper and base elements will inherit global layouts from a shared structure, 
+   but since Angular scopes css per component, we re-apply the structural shell here. */
+.dashboard-wrapper {
+  padding: 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
 
-        .input-fields {
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-            gap: 20px;
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
 
-            .input-container {
-                display: flex;
-                flex-direction: column;
-            }
-        }
+/* Base Card Styling for PrimeNG */
+::ng-deep .p-card {
+  background-color: $card-bg;
+  border-radius: $border-radius;
+  border: $card-border;
+  box-shadow: 0 8px 32px $shadow-color;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #e0e0e0;
+  overflow: hidden;
 
-        .buttons {
-            display: flex;
-            gap: 20px;
-        }
+  .p-card-header {
+    padding: 1.25rem 1.25rem 0 1.25rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #fff;
+  }
+}
 
-        .bill-wrapper {
-            display: flex;
-            justify-content: space-evenly;
+/* --- Summary Section --- */
+.summary-card {
+  ::ng-deep .p-card-body {
+    padding: 1.5rem;
+  }
+}
 
-            .current-bills-wrapper, .chosen-bills-wrapper {
-                background-color: white;
-                color: black;
-                border-radius: 5px;
-                padding: 20px;
-                display: flex;
-                flex-direction: column;
-                justify-content: flex-start;
-                align-items: flex-start;
-                gap: 10px;
-                min-width: 300px;
+.summary-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
 
-                .bill-data {
-                    background-color: lightgray;
-                    padding: 5px;
-                    border-radius: 5px;
-                    cursor: pointer;
-                }
-            }
-        }
+  @media (min-width: 768px) {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  &.totals-grid {
+    @media (min-width: 768px) {
+      grid-template-columns: repeat(3, 1fr);
     }
+  }
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.5rem;
+  
+  &.input-item {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+
+    input {
+      width: 120px;
+      text-align: right;
+    }
+  }
+
+  .label {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #fff;
+
+    &.positive { color: #4ade80; } /* Tailwind Green 400 */
+    &.negative { color: #f87171; } /* Tailwind Red 400 */
+  }
+}
+
+.highlight-item {
+  background: rgba(255,255,255,0.03);
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.05);
+  margin-top: 0.5rem;
+  
+  @media (min-width: 768px) {
+    margin-top: 0;
+  }
+}
+
+/* --- Main Layout --- */
+.dashboard-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+
+  @media (min-width: 992px) {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+/* --- Bills Section --- */
+.bills-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.bill-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255,255,255,0.05);
+  padding: 0.75rem;
+  border-radius: 8px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+
+  .bill-content {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .bill-name-display {
+    font-weight: 500;
+    font-size: 1.1rem;
+  }
+
+  .bill-price-display {
+    font-family: monospace;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #e0e0e0;
+  }
+}
+
+.selectable-bill {
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  i {
+    transition: transform 0.2s ease;
+  }
+
+  &:hover i.bx-chevron-left {
+    transform: translateX(-4px);
+    color: #4ade80 !important;
+  }
+
+  &.chosen:hover i.bx-chevron-right {
+    transform: translateX(4px);
+  }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  color: rgba(255, 255, 255, 0.4);
+  text-align: center;
+
+  i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+}
+
+/* Animations */
+.slide-in {
+  animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

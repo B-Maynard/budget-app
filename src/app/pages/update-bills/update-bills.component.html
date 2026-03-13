@@ -1,31 +1,40 @@
-<div class="update-bills-wrapper">
+<div class="dashboard-wrapper">
   <p-toast />
 
-  <div class="update-bills-container">
-    <div class="buttons">
-      <p-button (onClick)="showNewBill()">New Bill</p-button>
-    </div>
-    @if (showNewBillDialog) {
-      <div class="new-bill-wrapper">
-        <div class="bill-container">
-          <input [(ngModel)]="newBillName" class="new-bill-input" pInputText/>
-          <div class="bill-content">
-            <input [(ngModel)]="newBillPrice" class="input" type="number" pInputText/>
-            <p-button (onClick)="addNewBill()" class="save-button" size="small" label="Save" />
-          </div>
-        </div>
+  <div class="dashboard-container">
+    <p-card header="Manage Bills" styleClass="bills-card">
+      <div class="action-buttons mb-4">
+        <p-button (onClick)="showNewBill()" label="New Bill" icon="bx bx-plus" class="flex-1" styleClass="w-full" />
       </div>
-    }
-    <div class="bill-wrapper">
-      @for (bill of bills; track bill) {
-        <div class="bill-container">
-          <input #billName [id]="bill._id" class="bill-header input" pInputText [value]="bill.name"/>
-          <div class="bill-content">
-            <input #billPrice [id]="bill._id" class="input" type="number" pInputText [value]="bill.price"/>
-            <p-button (onClick)="save(bill._id)" class="save-button" size="small" label="Save" />
+
+      @if (showNewBillDialog) {
+        <div class="summary-grid mb-4 highlight-item slide-in">
+          <div class="summary-item">
+            <span class="label">Bill Name</span>
+            <input [(ngModel)]="newBillName" class="w-full" pInputText placeholder="E.g., Internet" />
+          </div>
+          <div class="summary-item">
+            <span class="label">Amount</span>
+            <input [(ngModel)]="newBillPrice" class="w-full" type="number" pInputText placeholder="0.00" />
+          </div>
+          <div class="action-buttons" style="align-self: flex-end;">
+            <p-button (onClick)="addNewBill()" class="flex-1" styleClass="w-full" severity="success" label="Save" icon="bx bx-save" />
           </div>
         </div>
       }
-    </div>
+
+      <div class="bills-list">
+        @for (bill of bills; track bill) {
+          <div class="bill-item slide-in">
+            <div class="bill-content" style="flex-wrap: wrap;">
+              <input #billName [id]="bill._id" class="bill-header flex-1 w-full" pInputText [value]="bill.name" placeholder="Bill Name" />
+              <input #billPrice [id]="bill._id" class="input flex-1" type="number" pInputText [value]="bill.price" placeholder="Amount" />
+            </div>
+            <p-button (onClick)="save(bill._id)" icon="bx bx-save" [rounded]="true" [text]="true" severity="success" />
+          </div>
+        }
+      </div>
+
+    </p-card>
   </div>
 </div>

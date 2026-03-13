@@ -3,7 +3,27 @@
 
 
 html, body {
-    background-color: #292929;
-    color: white;
-    font-family: 'Roboto';
+    background-color: #121212; /* Deep modern dark mode */
+    color: #e0e0e0;
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-image: radial-gradient(circle at top right, #1a1a2e, #121212);
+    min-height: 100vh;
+}
+
+/* Custom Webkit Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #1e1e1e;
+}
+::-webkit-scrollbar-thumb {
+    background: #454545;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #666;
 }

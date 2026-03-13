@@ -1,143 +1,293 @@
-.main-page-wrapper {
+/* Variables */
+$border-radius: 12px;
+$card-bg: #1e1e1e;
+$card-border: 1px solid rgba(255, 255, 255, 0.05);
+$shadow-color: rgba(0, 0, 0, 0.4);
 
-    .table {
-        border-radius: 5px;
-        width: 99%;
-        display: flex;
-        flex-direction: column;
-        background-color: white;
-        color: black;
-        padding: 10px;
-        margin: 0 auto;
-        margin-bottom: 20px;
+/* Utility overrides for PrimeNG */
+::ng-deep .w-full { width: 100% !important; }
+::ng-deep .mb-4 { margin-bottom: 1rem !important; }
+::ng-deep .mt-4 { margin-top: 1rem !important; }
+::ng-deep .mt-3 { margin-top: 0.75rem !important; }
+::ng-deep .flex-1 { flex: 1 !important; }
 
-        .purchase-table {
-            border: 1px solid #9e9e9e;
-            border-radius: 5px;
-            padding-left: 20px;
-            padding-right: 20px;
-            padding-top: 5px;
-            padding-bottom: 5px;
+.dashboard-wrapper {
+  padding: 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
 
-            .data-row {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Base Card Styling for PrimeNG */
+::ng-deep .p-card {
+  background-color: $card-bg;
+  border-radius: $border-radius;
+  border: $card-border;
+  box-shadow: 0 8px 32px $shadow-color;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #e0e0e0;
+  overflow: hidden;
+
+  .p-card-header {
+    padding: 1.25rem 1.25rem 0 1.25rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #fff;
+  }
+}
+
+/* --- Summary Section --- */
+.summary-card {
+  ::ng-deep .p-card-body {
+    padding: 1.5rem;
+  }
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+
+  @media (min-width: 768px) {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  &.totals-grid {
+    @media (min-width: 768px) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.5rem;
+  
+  &.input-item {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+
+    input {
+      width: 120px;
+      text-align: right;
+    }
+  }
+
+  .label {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #fff;
+
+    &.positive { color: #4ade80; } /* Tailwind Green 400 */
+    &.negative { color: #f87171; } /* Tailwind Red 400 */
+  }
+}
+
+.highlight-item {
+  background: rgba(255,255,255,0.03);
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.05);
+  margin-top: 0.5rem;
+  
+  @media (min-width: 768px) {
+    margin-top: 0;
+  }
+}
+
+/* --- Main Layout --- */
+.dashboard-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+
+  @media (min-width: 992px) {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+
+/* --- Purchases Section --- */
+.purchases-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+
+  .control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    .label {
+      font-size: 0.875rem;
+      color: rgba(255, 255, 255, 0.8);
+    }
+  }
+
+  .purchase-inputs {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+
+    @media (min-width: 500px) {
+      grid-template-columns: 2fr 1fr;
+    }
+  }
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.purchase-list {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 1rem;
+  
+  .list-title {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .list-items {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .list-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 6px;
+    transition: background 0.2s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .item-name { font-weight: 500; }
+    .item-price { font-family: monospace; font-size: 1.1em; color: rgba(255, 255, 255, 0.8);}
+  }
+}
+
+
+/* --- Bills Section --- */
+.bills-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.bill-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255,255,255,0.05);
+  padding: 0.75rem;
+  border-radius: 8px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .bill-content {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .bill-saved-info {
+    display: flex;
+    flex-direction: column;
     
-                .title {
-                    font-weight: bold;
-                }
-            }
-        }
-
-        .input-row, .data-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-
-            .title {
-                font-weight: bold;
-            }
-        }
-
-        .input-row > input {
-            width: 100px;
-        }
-
-        hr {
-            width: 100%;
-            color: black;
-        }
+    .bill-name-display {
+      font-weight: 500;
+      font-size: 1.1rem;
     }
+  }
 
-    .current-bills {
+  .bill-price-display {
+    font-family: monospace;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #e0e0e0;
+  }
+}
 
-        .extras {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            gap: 50px;
-            width: 100%;
-            margin-bottom: 20px;
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  color: rgba(255, 255, 255, 0.4);
+  text-align: center;
 
-            background-color: #454545;
-            border-radius: 5px;
-            gap: 10px;
-            padding: 15px;
+  i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+}
 
-            .extra-container {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
+/* --- Auth Overlay --- */
+.auth-overlay {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
 
-                input {
-                    width: 100px;
-                }
-            }
-        }
-
-        .buttons {
-            display: flex;
-            justify-content: space-evenly;
-            align-items: center;
-            margin-top: 5px;
-            margin-bottom: 20px;
-        }
-
-        .bill {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-
-            .remove-bill {
-                flex: 1;
-                display: flex;
-                justify-content: flex-start;
-            }
-
-            .bill-name {
-                flex: 2;
-                display: flex;
-                justify-content: center;
-            }
-
-            .bill-price {
-                flex: 1;
-                display: flex;
-                justify-content: flex-end;
-            }
-
-            .bill-name-input {
-                width: 200px;
-            }
-        }
+  .auth-card {
+    width: 100%;
+    max-width: 400px;
+    
+    .auth-subtitle {
+      color: rgba(255, 255, 255, 0.6);
+      margin-bottom: 2rem;
     }
+  }
+}
 
-    .sub-header-text {
-        font-size: 1.5em;
-    }
+/* Animations */
+.slide-in {
+  animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
 
-    .landing-page {
-
-        width: 100%;
-        height: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-
-
-        .token-card {
-            margin-top: 10px;
-
-            .token-card-content {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                gap: 30px;
-            }
-        }
-
-
-    }
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

@@ -1,128 +1,145 @@
-<div class="main-page-wrapper">
+<div class="dashboard-wrapper">
   @if (hasAuthToken) {
-    <div>
+    <div class="dashboard-container">
       <p-toast />
       <p-confirmDialog />
-      <div class="table">
-        <div class="input-row">
-          <div class="title">
-            Income
+      
+      <!-- Summary Section -->
+      <p-card styleClass="summary-card">
+        <div class="summary-grid">
+          <div class="summary-item input-item">
+            <span class="label">Income</span>
+            <input type="number" pInputText [(ngModel)]="income" placeholder="0.00" />
           </div>
-          <input class="input" type="number" pInputText [(ngModel)]="income" />
-        </div>
-        <hr />
-        <div class="input-row">
-          <div class="title">
-            Current CC Balance
+          <div class="summary-item input-item">
+            <span class="label">Current CC Balance</span>
+            <input type="number" pInputText [(ngModel)]="spent" placeholder="0.00" />
           </div>
-          <input class="input" type="number" pInputText [(ngModel)]="spent" />
         </div>
-        <hr />
-        <div class="data-row">
-          <div class="title">
-            Bill Total
+
+        <p-divider></p-divider>
+
+        <div class="summary-grid totals-grid">
+          <div class="summary-item">
+            <span class="label">Bill Total</span>
+            <span class="value">{{ billTotal | currency }}</span>
           </div>
-          <div class="data">{{billTotal}}</div>
-        </div>
-        <hr />
-        <div class="data-row">
-          <div class="title">
-            Debt
+          <div class="summary-item">
+            <span class="label">Debt</span>
+            <span class="value debt-value" [class.negative]="(income - (spent + billTotal)) < 0">
+              {{ income - (spent + billTotal) | currency }}
+            </span>
           </div>
-          <div class="data">{{income - (spent + billTotal)}}</div>
-        </div>
-        <hr />
-        <div class="data-row">
-          <div class="title">
-            Money Available
+          <div class="summary-item highlight-item">
+            <span class="label">Money Available</span>
+            <span class="value available-value" [class.positive]="((income + spendingOffset) - (billTotal + purchaseTotal)) > 0" [class.negative]="((income + spendingOffset) - (billTotal + purchaseTotal)) < 0">
+              {{ (income + spendingOffset) - (billTotal + purchaseTotal) | currency }}
+            </span>
           </div>
-          <div class="data">{{(income + spendingOffset) - (billTotal + purchaseTotal)}}</div>
         </div>
-        @if (currentPurchases.length > 0) {
-          <div class="purchase-table">
-            @for (item of currentPurchases; track item) {
-              <div class="data-row">
-                <div class="title">
-                  {{item?.name}}
+      </p-card>
+
+      <!-- Main Two-Column Layout on Desktop -->
+      <div class="dashboard-layout">
+        
+        <!-- Left Column: Purchases & Offset -->
+        <div class="layout-column">
+          <p-card header="Purchases & Offset" styleClass="purchases-card">
+            <div class="purchases-controls">
+              <div class="control-group">
+                <span class="label">Spending Offset</span>
+                <input class="w-full" type="number" pInputText [(ngModel)]="spendingOffset" placeholder="0.00" />
+              </div>
+
+              <div class="purchase-inputs">
+                <div class="control-group">
+                  <span class="label">Purchase Name</span>
+                  <input class="w-full" type="text" pInputText [(ngModel)]="purchaseName" placeholder="E.g., Groceries" />
                 </div>
-                <div class="data">{{item?.price}}</div>
+                <div class="control-group">
+                  <span class="label">Amount</span>
+                  <input class="w-full" type="number" pInputText [(ngModel)]="purchase" placeholder="0.00" />
+                </div>
+              </div>
+
+              <div class="action-buttons">
+                <p-button (onClick)="addPurchase()" [disabled]="!purchaseName || !purchase" label="Add Purchase" icon="bx bx-plus" class="flex-1" styleClass="w-full" />
+                <p-button (onClick)="confirmClearPuchases($event)" label="Clear" icon="bx bx-trash" severity="danger" [outlined]="true" />
+              </div>
+            </div>
+
+            @if (currentPurchases.length > 0) {
+              <div class="purchase-list mt-4">
+                <h3 class="list-title">Recent Purchases</h3>
+                <div class="list-items">
+                  @for (item of currentPurchases; track item) {
+                    <div class="list-item">
+                      <span class="item-name">{{ item?.name }}</span>
+                      <span class="item-price">{{ item?.price | currency }}</span>
+                    </div>
+                  }
+                </div>
               </div>
             }
-          </div>
-        }
-      </div>
-      <div class="current-bills">
-        <div class="extras">
-          <div class="extra-container">
-            <div class="title">
-              Spending Offset
-            </div>
-            <input class="input" type="number" pInputText [(ngModel)]="spendingOffset" />
-          </div>
-          <div class="extra-container">
-            <div class="title">
-              Add New Purchase
-            </div>
-            <input class="input" type="number" pInputText [(ngModel)]="purchase" />
-          </div>
-          <div class="extra-container">
-            <div class="title">
-              Purchase Name
-            </div>
-            <input class="input" type="text" pInputText [(ngModel)]="purchaseName" />
-          </div>
-          <div class="extra-container">
-            <p-button (onClick)="addPurchase()" size="small" label="Add" />
-            <p-button (onClick)="confirmClearPuchases($event)" size="small" label="Clear" severity="danger"/>
-          </div>
+          </p-card>
         </div>
-        <div class="buttons">
-          <p-button (onClick)="confirmClear($event)" size="small" label="Clear Bills" severity="danger"/>
-          <p-button (onClick)="saveBills()" size="small" label="Save Bills" severity="success"/>
-          <p-button (onClick)="addBill()" size="small" label="Add Bill" />
-        </div>
-        @for (bill of selectedBills; track bill) {
-          <div>
-            <div class="bill">
-              <div class="remove-bill">
-                <p-button (onClick)="removeBill(bill.index)" icon="bx bx-x" [rounded]="true" severity="danger" size="small" />
-              </div>
-              <div class="bill-name">
-                @if (!bill.saved) {
-                  <p-select
-                    [style]="{'max-width': '150px'}"
-                    autoWidth="false"
-                    [options]="bills"
-                    (onChange)="onBillChange($event, bill.index)"
-                    optionLabel="name"
-                    placeholder="Select a bill..."
-                    [filter]="true"
-                    filterBy="name"
-                    />
-                }
-                @if (bill.saved) {
-                  <input [disabled]="true" class="bill-name-input" type="text" pInputText  [ngModel]="bill.name"/>
-                }
-              </div>
-              <div class="bill-price">
-                {{bill?.price}}
-              </div>
+
+        <!-- Right Column: Bills -->
+        <div class="layout-column">
+          <p-card header="Bills Management" styleClass="bills-card">
+            <div class="action-buttons mb-4">
+              <p-button (onClick)="addBill()" label="Add Bill" icon="bx bx-plus" class="flex-1" styleClass="w-full" />
+              <p-button (onClick)="saveBills()" label="Save Bills" icon="bx bx-save" severity="success" class="flex-1" styleClass="w-full" />
+              <p-button (onClick)="confirmClear($event)" label="Clear" icon="bx bx-trash" severity="danger" [outlined]="true" />
             </div>
-          </div>
-        }
+
+            <div class="bills-list">
+              @for (bill of selectedBills; track bill) {
+                <div class="bill-item slide-in">
+                  <div class="bill-content">
+                    @if (!bill.saved) {
+                      <p-select
+                        styleClass="w-full"
+                        [options]="bills"
+                        (onChange)="onBillChange($event, bill.index)"
+                        optionLabel="name"
+                        placeholder="Select a bill..."
+                        [filter]="true"
+                        filterBy="name"
+                        appendTo="body"
+                      />
+                    } @else {
+                      <div class="bill-saved-info">
+                        <span class="bill-name-display">{{ bill.name }}</span>
+                      </div>
+                    }
+                    <span class="bill-price-display">{{ bill?.price | currency }}</span>
+                  </div>
+                  <p-button (onClick)="removeBill(bill.index)" icon="bx bx-x" [rounded]="true" [text]="true" severity="danger" />
+                </div>
+              }
+            </div>
+            @if (selectedBills.length === 0) {
+              <div class="empty-state">
+                  <i class="bx bx-receipt"></i>
+                  <p>No bills added yet.</p>
+              </div>
+            }
+          </p-card>
+        </div>
+
       </div>
     </div>
   }
   @if (!hasAuthToken) {
-    <div>
-      <div class="landing-page">
-        <p-card class="token-card" header="Enter Access Token">
-          <div class="token-card-content">
-            <p-password [(ngModel)]="authToken" [feedback]="false" />
-            <p-button (onClick)="saveToken()" size="small" label="Save Token" />
-          </div>
-        </p-card>
-      </div>
+    <div class="auth-overlay">
+      <p-card header="Welcome Back" styleClass="auth-card">
+        <p class="auth-subtitle">Please enter your access token to continue.</p>
+        <div class="auth-form">
+          <p-password [(ngModel)]="authToken" [feedback]="false" placeholder="Access Token" styleClass="w-full" [toggleMask]="true" />
+          <p-button (onClick)="saveToken()" label="Authenticate" icon="bx bx-lock-open" [disabled]="!authToken" styleClass="w-full mt-3" />
+        </div>
+      </p-card>
     </div>
   }
 </div>
