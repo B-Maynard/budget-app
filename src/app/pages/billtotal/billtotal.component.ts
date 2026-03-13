@@ -1,4 +1,7 @@
 import { Component, ElementRef, OnInit, QueryList, ViewChildren } from '@angular/core';
+import { CardModule } from 'primeng/card';
+import { DividerModule } from 'primeng/divider';
+import { CurrencyPipe } from '@angular/common';
 import { BillsService } from '../../services/bills.service';
 import { SpinnerService } from '../../services/spinner.service';
 import { sessionConfig } from '../../configs/session.config';
@@ -20,7 +23,10 @@ import { InputTextModule } from 'primeng/inputtext';
     ReactiveFormsModule,
     FormsModule,
     ToastModule,
-    InputTextModule
+    InputTextModule,
+    CardModule,
+    DividerModule,
+    CurrencyPipe
 ],
   templateUrl: './billtotal.component.html',
   styleUrl: './billtotal.component.scss'
