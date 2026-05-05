@@ -1,5 +1,4 @@
-
-import { AfterViewInit, Component, OnDestroy, OnInit, QueryList, ViewChildren } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { Select, SelectModule } from 'primeng/select';
@@ -8,13 +7,17 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
 import { BillsService } from '../../services/bills.service';
+import { PaydaysService } from '../../services/paydays.service';
+import { AppConfigService } from '../../services/app-config.service';
 import { sessionConfig } from '../../configs/session.config';
 import { Bill, CurrentBillConfig } from './dashboard.interface';
-import { BehaviorSubject, catchError, concatMap, Subscription } from 'rxjs';
+import { BehaviorSubject, catchError, concatMap, Subscription, forkJoin } from 'rxjs';
 import { CardModule } from 'primeng/card';
 import { DividerModule } from 'primeng/divider';
-import { CurrencyPipe } from '@angular/common';
+import { CurrencyPipe, DatePipe } from '@angular/common';
 import { PasswordModule } from 'primeng/password';
+import { DatePickerModule } from 'primeng/datepicker';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-dashboard',
@@ -30,8 +33,11 @@ import { PasswordModule } from 'primeng/password';
     ToastModule,
     CardModule,
     DividerModule,
-    CurrencyPipe
-],
+    CurrencyPipe,
+    DatePipe,
+    DatePickerModule,
+    TooltipModule
+  ],
   providers: [
     ConfirmationService,
     MessageService
@@ -42,7 +48,6 @@ import { PasswordModule } from 'primeng/password';
 export class DashboardComponent implements OnInit, OnDestroy {
 
   public income: number = 0;
-  public spent: number = 0;
   public billTotal: number = 0;
   public spendingOffset: number = 0;
 
@@ -52,8 +57,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public currentPurchases: any[] = [];
 
   public bills: any[] = [];
+  public paydays: any[] = [];
 
-  public selectedBills: any[] = [];
+  public currentCycleStart: Date | null = null;
+  public currentCycleEnd: Date | null = null;
+  public generatedBills: any[] = [];
+
+  public paydayDates: Date[] = [];
+  public calendarMonth: number = new Date().getMonth();
+  public calendarYear: number = new Date().getFullYear();
+  public calendarDefaultDate: Date = new Date();
+  public filteredPaydays: any[] = [];
+  @ViewChild('paydayCalendar') paydayCalendar: any;
 
   private startupSub: Subscription | undefined | null = null;
 
@@ -64,6 +79,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private confirmationService: ConfirmationService,
     private messageService: MessageService,
     private billsService: BillsService,
+    private paydaysService: PaydaysService,
+    private appConfigService: AppConfigService
   ) { }
 
   ngOnDestroy(): void {
@@ -78,23 +95,34 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (localStorage.getItem(sessionConfig.dbAccessToken)) {
       this.authToken = localStorage.getItem(sessionConfig.dbAccessToken);
 
-      return this.billsService.getBills(this.authToken!).pipe(
+      return forkJoin({
+        bills: this.billsService.getBills(this.authToken!),
+        paydays: this.paydaysService.getPaydays(this.authToken!),
+        config: this.appConfigService.getConfig(this.authToken!)
+      }).pipe(
         concatMap((response: any) => {
-          this.bills = response;
+          this.bills = response.bills;
+          this.paydays = response.paydays;
+          this.income = Number(response.config.income) || 0;
+
+          // Build the dates array for the calendar from saved paydays
+          this.paydayDates = this.paydays.map((p: any) => {
+            let d = new Date(p.date + 'T00:00:00');
+            return d;
+          });
+
+          // Calendar resets to current month on rebuild, so sync our tracking
+          this.calendarMonth = new Date().getMonth();
+          this.calendarYear = new Date().getFullYear();
+          this.calendarDefaultDate = new Date();
+
+          this.calculateCycle();
+          this.filterPaydaysByMonth();
 
           if (localStorage.getItem(sessionConfig.localStorage.currentBills)) {
             let currentBillObj = JSON.parse(localStorage.getItem(sessionConfig.localStorage.currentBills)!);
-    
-            this.selectedBills = currentBillObj.bills;
-            this.income = currentBillObj.income;
-            this.spent = currentBillObj.spent;
             this.spendingOffset = currentBillObj.spendingOffset;
             this.purchaseTotal = currentBillObj.purchaseTotal;
-    
-            this.selectedBills.forEach((bill: Bill) => {
-              bill.saved = true;
-              this.billTotal += bill.price;
-            });
           }
 
           if (localStorage.getItem(sessionConfig.localStorage.currentPurchases)) {
@@ -116,7 +144,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     return new BehaviorSubject<boolean>(false);
-
   }
 
   saveToken() {
@@ -126,86 +153,242 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  onBillChange($event: any, index: number) {
-    let currentBill = this.selectedBills.find(bill => bill.index === index);
-    this.billTotal -= currentBill.price;
-
-    currentBill.name = $event?.value?.name;
-    currentBill.price = $event?.value?.price;
-
-    this.billTotal += currentBill.price;
+  saveIncome() {
+    if (!this.authToken) return;
+    this.appConfigService.updateIncome(this.authToken, this.income).subscribe(() => {
+      this.messageService.add({ severity: 'success', summary: 'Saved', detail: 'Income updated' });
+    });
   }
 
-  addBill() {
-    let currentIndex = 1;
-
-    if (this.selectedBills.length > 0) {
-      let currentMax = Math.max(...this.selectedBills.map(bill => bill.index));
-      currentIndex = currentMax + 1;
-    }
-
-    let newBill = {
-      name: "Empty Bill",
-      price: 0,
-      index: currentIndex
-    };
-
-    this.selectedBills.push(newBill);
-    console.log(this.selectedBills);
+  filterPaydaysByMonth() {
+    this.filteredPaydays = this.paydays.filter((p: any) => {
+      let d = new Date(p.date + 'T00:00:00');
+      return d.getMonth() === this.calendarMonth && d.getFullYear() === this.calendarYear;
+    });
   }
 
-  removeBill(index: number) {
-    let currentBill = this.selectedBills.find(bill => bill.index === index);
-    this.billTotal -= currentBill.price;
-
-    this.selectedBills = this.selectedBills.filter(bill => bill.index != index);
+  onMonthChange(event: any) {
+    // PrimeNG emits { month: 1-12, year: YYYY }
+    this.calendarMonth = event.month - 1;
+    this.calendarYear = event.year;
+    this.calendarDefaultDate = new Date(this.calendarYear, this.calendarMonth, 1);
+    this.filterPaydaysByMonth();
   }
 
-  clearBills() {
-    this.selectedBills = [];
-    this.billTotal = 0;
-    this.purchaseTotal = 0;
-    this.spendingOffset = 0;
-  }
+  onCalendarModelChange(newDates: Date[]) {
+    if (!this.authToken) return;
 
-  confirmClear($event: Event) {
-    this.confirmationService.confirm({
-      target: $event.target as EventTarget,
-      message: 'Are you sure you want to clear current configuration?',
-      header: 'Confirmation',
-      icon: 'bx bxs-error-alt',
-      acceptIcon: "none",
-      rejectIcon: "none",
-      rejectButtonStyleClass: "p-button-text",
-      accept: () => {
-        this.clearBills();
-        this.messageService.add({ severity: 'info', summary: 'Cleared', detail: 'Bills have been cleared' });
-      },
-      reject: () => {
-        return;
+    let newDateStrs = newDates.map(d => this.formatDate(d));
+    let oldDateStrs = this.paydays.map((p: any) => p.date);
+
+    // Find added dates
+    let added = newDateStrs.filter(d => !oldDateStrs.includes(d));
+    // Find removed dates
+    let removed = oldDateStrs.filter(d => !newDateStrs.includes(d));
+
+    added.forEach(dateStr => {
+      this.paydaysService.saveNewPayday(this.authToken!, dateStr).subscribe(() => {
+        this.messageService.add({ severity: 'success', summary: 'Saved', detail: 'Payday added' });
+        this.refreshPaydays();
+      });
+    });
+
+    removed.forEach(dateStr => {
+      let existing = this.paydays.find((p: any) => p.date === dateStr);
+      if (existing) {
+        this.paydaysService.deletePayday(this.authToken!, existing.id).subscribe(() => {
+          this.messageService.add({ severity: 'success', summary: 'Deleted', detail: 'Payday removed' });
+          this.refreshPaydays();
+        });
       }
     });
   }
 
-  saveBills() {
-    let currentBillObj: CurrentBillConfig = {
-      income: this.income,
-      spent: this.spent,
-      spendingOffset: this.spendingOffset,
-      purchaseTotal: this.purchaseTotal,
-      bills: []
+  deletePayday(id: string) {
+    if (!this.authToken) return;
+    let payday = this.paydays.find((p: any) => p.id === id);
+    if (payday) {
+      let d = new Date(payday.date + 'T00:00:00');
+      let idx = this.paydayDates.findIndex(pd => pd.getTime() === d.getTime());
+      if (idx > -1) {
+        this.paydayDates.splice(idx, 1);
+        if (this.paydayCalendar) {
+          // Tell the calendar its data changed so it removes the highlight,
+          // but without triggering a full re-render that resets the month.
+          this.paydayCalendar.cd.markForCheck();
+        }
+      }
+    }
+    this.paydaysService.deletePayday(this.authToken, id).subscribe(() => {
+      this.messageService.add({ severity: 'success', summary: 'Deleted', detail: 'Payday removed' });
+      this.refreshPaydays();
+    });
+  }
+
+  /** Lightweight refresh: updates paydays data and recalculates without touching the calendar view */
+  private refreshPaydays() {
+    if (!this.authToken) return;
+    this.paydaysService.getPaydays(this.authToken).subscribe((paydays: any) => {
+      this.paydays = paydays;
+      this.calculateCycle();
+      this.filterPaydaysByMonth();
+    });
+  }
+
+  calculateCycle() {
+    if (!this.paydays || this.paydays.length === 0) {
+      this.currentCycleStart = null;
+      this.currentCycleEnd = null;
+      this.generatedBills = [];
+      this.billTotal = 0;
+      return;
     }
 
-    this.selectedBills.forEach((bill: any) => {
-      currentBillObj.bills.push(bill);
+    // sort paydays by date
+    let sortedPaydays = [...this.paydays].sort((a, b) => new Date(a.date + 'T00:00:00').getTime() - new Date(b.date + 'T00:00:00').getTime());
+    let today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    let start: Date | null = null;
+    let end: Date | null = null;
+
+    // Find the largest payday <= today
+    for (let i = sortedPaydays.length - 1; i >= 0; i--) {
+      let pDate = new Date(sortedPaydays[i].date + 'T00:00:00');
+
+      if (pDate.getTime() <= today.getTime()) {
+        start = pDate;
+        if (i + 1 < sortedPaydays.length) {
+          end = new Date(sortedPaydays[i + 1].date + 'T00:00:00');
+        }
+        break;
+      }
+    }
+
+    // If we couldn't find a start payday (all paydays are in the future), just show from the first one
+    if (!start) {
+      start = new Date(sortedPaydays[0].date + 'T00:00:00');
+      if (sortedPaydays.length > 1) {
+        end = new Date(sortedPaydays[1].date + 'T00:00:00');
+      }
+    }
+
+    this.currentCycleStart = start;
+    this.currentCycleEnd = end;
+
+    this.generateBillsForCycle();
+  }
+
+  generateBillsForCycle() {
+    this.generatedBills = [];
+    this.billTotal = 0;
+
+    if (!this.currentCycleStart) return;
+
+    // If there is no end date (e.g., they only added 1 payday), we can assume a 14 day cycle or just to the end of the month.
+    // Let's assume up to 1 month ahead
+    let end = this.currentCycleEnd;
+    if (!end) {
+      end = new Date(this.currentCycleStart);
+      end.setMonth(end.getMonth() + 1);
+    }
+
+    this.bills.forEach(bill => {
+      let occurrences = this.getOccurrences(bill, this.currentCycleStart!, end!);
+      occurrences.forEach(dateStr => {
+        let isPaid = bill.paidDates && bill.paidDates.includes(dateStr);
+        let generated = {
+          ...bill,
+          occurrenceDate: dateStr,
+          isPaid: isPaid
+        };
+        this.generatedBills.push(generated);
+        if (!isPaid) {
+          this.billTotal += Number(bill.price);
+        }
+      });
     });
 
-    localStorage.setItem(sessionConfig.localStorage.currentBills, JSON.stringify(currentBillObj));
-    this.messageService.add({ severity: 'info', summary: 'Saved', detail: 'Bills have been saved' });
+    // sort generated bills by date
+    this.generatedBills.sort((a, b) => new Date(a.occurrenceDate).getTime() - new Date(b.occurrenceDate).getTime());
+  }
+
+  getOccurrences(bill: any, start: Date, end: Date): string[] {
+    let dates: string[] = [];
+    let current = new Date(start);
+
+    // Give a safety limit to avoid infinite loops
+    let limit = 0;
+
+    while (current < end && limit < 100) {
+      limit++;
+      if (bill.frequency === 'monthly') {
+        let lastDay = new Date(current.getFullYear(), current.getMonth() + 1, 0).getDate();
+        let targetDay = bill.dueDay > lastDay ? lastDay : bill.dueDay;
+
+        let targetDate = new Date(current.getFullYear(), current.getMonth(), targetDay);
+        if (targetDate >= start && targetDate < end) {
+          dates.push(this.formatDate(targetDate));
+        }
+
+        // Move to the first day of next month to continue checking
+        current = new Date(current.getFullYear(), current.getMonth() + 1, 1);
+      } else if (bill.frequency === 'weekly') {
+        if (current.getDay() === bill.dueDayOfWeek) {
+          dates.push(this.formatDate(current));
+        }
+        current.setDate(current.getDate() + 1);
+      } else if (bill.frequency === 'yearly') {
+        let targetDate = new Date(current.getFullYear(), bill.dueMonth - 1, bill.dueDay);
+        if (targetDate >= start && targetDate < end) {
+          dates.push(this.formatDate(targetDate));
+        }
+        current = new Date(current.getFullYear() + 1, 0, 1);
+      } else {
+        break; // one-time
+      }
+    }
+    return dates;
+  }
+
+  formatDate(d: Date): string {
+    let month = '' + (d.getMonth() + 1);
+    let day = '' + d.getDate();
+    let year = d.getFullYear();
+
+    if (month.length < 2) month = '0' + month;
+    if (day.length < 2) day = '0' + day;
+
+    return [year, month, day].join('-');
+  }
+
+  togglePaid(bill: any) {
+    let isPaid = !bill.isPaid;
+    let originalBill = this.bills.find((b: any) => (b.id || b._id) === (bill.id || bill._id));
+
+    if (!originalBill.paidDates) {
+      originalBill.paidDates = [];
+    } else if (typeof originalBill.paidDates === 'string') {
+      originalBill.paidDates = originalBill.paidDates.split(',');
+    }
+
+    if (isPaid) {
+      if (!originalBill.paidDates.includes(bill.occurrenceDate)) {
+        originalBill.paidDates.push(bill.occurrenceDate);
+      }
+    } else {
+      originalBill.paidDates = originalBill.paidDates.filter((d: string) => d !== bill.occurrenceDate);
+    }
+
+    // Re-stringify for simple-array TypeORM column handling if needed, but NestJS typically handles it. 
+    // Wait, simple-array expects string[] from the client, so we send the array.
+
+    this.billsService.updateBill(this.authToken!, originalBill).subscribe(() => {
+      this.generateBillsForCycle();
+    });
   }
 
   addPurchase() {
-
     let tempPurchase = {
       name: this.purchaseName,
       price: this.purchase
@@ -219,6 +402,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     localStorage.setItem(sessionConfig.localStorage.currentPurchases, JSON.stringify(this.currentPurchases));
     this.purchase = null;
+    this.purchaseName = '';
   }
 
   confirmClearPuchases($event: Event) {
@@ -232,7 +416,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       rejectButtonStyleClass: "p-button-text",
       accept: () => {
         this.clearPurchasesAndOffset();
-        this.messageService.add({ severity: 'info', summary: 'Cleared', detail: 'Bills have been cleared' });
+        this.messageService.add({ severity: 'info', summary: 'Cleared', detail: 'Purchases have been cleared' });
       },
       reject: () => {
         return;
@@ -246,7 +430,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.purchaseName = '';
 
     this.currentPurchases = [];
-    localStorage.setItem(sessionConfig.localStorage.currentPurchases, '');
+    localStorage.setItem(sessionConfig.localStorage.currentPurchases, JSON.stringify([]));
   }
 
 }

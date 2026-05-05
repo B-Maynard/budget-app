@@ -1,0 +1,66 @@
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #121212;
+}
+
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 70px; /* Space for the bottom nav */
+}
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background-color: #1e1e1e;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 1000;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+  text-decoration: none;
+  font-size: 0.75rem;
+  transition: color 0.2s ease;
+  flex: 1;
+  height: 100%;
+}
+
+.nav-item i {
+  font-size: 1.5rem;
+  margin-bottom: 2px;
+}
+
+.nav-item.active {
+  color: #4ade80; /* Primary/Success color used in app */
+}
+
+.nav-item:hover {
+  color: #fff;
+}
+
+/* For larger screens, maybe we don't want it stuck to the bottom, 
+   but since mobile is the focus, this is fine. 
+   We can add a max-width wrapper if needed. */
+@media (min-width: 800px) {
+  .bottom-nav {
+    max-width: 800px;
+    margin: 0 auto;
+    border-radius: 12px 12px 0 0;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+  }
+}

@@ -17,8 +17,14 @@ export class BillsService {
     updateBill(authToken: string, billObj: any) {
         let headers = new HttpHeaders();
         headers = headers.append("authToken", authToken);
-        console.log(headers);
-        return this.httpClient.patch(apiConfig.databaseRootPath + apiConfig.getBills + `/${billObj._id}`, {headers: headers, body: billObj}); 
+        const billId = billObj.id || billObj._id;
+        return this.httpClient.patch(apiConfig.databaseRootPath + apiConfig.getBills + `/${billId}`, billObj, {headers: headers}); 
+    }
+
+    deleteBill(authToken: string, id: string) {
+        let headers = new HttpHeaders();
+        headers = headers.append("authToken", authToken);
+        return this.httpClient.delete(apiConfig.databaseRootPath + apiConfig.getBills + `/${id}`, {headers: headers});
     }
 
     saveNewBill(authToken: string, billObj: any) {

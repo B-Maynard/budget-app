@@ -27,3 +27,13 @@ html, body {
 ::-webkit-scrollbar-thumb:hover {
     background: #666;
 }
+
+/* Responsive PrimeNG Toast for Mobile */
+@media screen and (max-width: 600px) {
+    .p-toast {
+        width: 90vw !important;
+        left: 50% !important;
+        right: auto !important;
+        transform: translateX(-50%) !important;
+    }
+}

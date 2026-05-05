@@ -13,18 +13,22 @@ import { MessageService } from 'primeng/api';
 import { BehaviorSubject, catchError, concatMap } from 'rxjs';
 import { CodeUtil } from '../../services/code-util.service';
 
+import { DialogModule } from 'primeng/dialog';
+import { CommonModule } from '@angular/common';
+
 @Component({
   selector: 'app-update-bills',
   standalone: true,
   imports: [
+    CommonModule,
     FormsModule,
     TableModule,
     ButtonModule,
     ReactiveFormsModule,
-    FormsModule,
     ToastModule,
     CardModule,
-    DividerModule
+    DividerModule,
+    DialogModule
 ],
   providers: [
     MessageService
@@ -32,19 +36,32 @@ import { CodeUtil } from '../../services/code-util.service';
   templateUrl: './update-bills.component.html',
   styleUrl: './update-bills.component.scss'
 })
-export class UpdateBillsComponent implements OnInit, AfterViewInit {
-
-  @ViewChildren('billName') billNames: QueryList<ElementRef> | undefined;
-  @ViewChildren('billPrice') billPrices: QueryList<ElementRef> | undefined;
+export class UpdateBillsComponent implements OnInit {
 
   bills: any;
-  billNamesDic: any[] = [];
-  billPricesDic: any[] = [];
   authToken: string | null = null;
+  
+  searchTerm: string = '';
 
-  newBillName: string | undefined;
-  newBillPrice: number | undefined;
-  showNewBillDialog: boolean = false;
+  billDialog: boolean = false;
+  dialogTitle: string = 'New Bill';
+  billForm: any = {
+    id: null,
+    name: '',
+    price: null,
+    frequency: 'monthly',
+    dueDay: 1,
+    dueMonth: 1,
+    dueDayOfWeek: 0
+  };
+
+  get filteredBills() {
+    if (!this.bills) return [];
+    if (!this.searchTerm) return this.bills;
+    return this.bills.filter((bill: any) => 
+      bill.name?.toLowerCase().includes(this.searchTerm.toLowerCase())
+    );
+  }
 
   constructor(
     private billService: BillsService,
@@ -55,6 +72,10 @@ export class UpdateBillsComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     this.authToken = localStorage.getItem(sessionConfig.dbAccessToken);
+    this.loadBills();
+  }
+
+  loadBills() {
     if (this.authToken) {
       this.billService.getBills(this.authToken).subscribe((response: any) => {
         this.bills = response;
@@ -62,83 +83,92 @@ export class UpdateBillsComponent implements OnInit, AfterViewInit {
     }
   }
 
-  ngAfterViewInit(): void {
-    this.spinnerService.showSpinner();
-    setTimeout(() => {
-
-      this.billNames?.forEach((element) => {
-        let currentInputObj = {
-          id: element.nativeElement?.attributes?.id?.value,
-          element: element
-        };
-
-        this.billNamesDic.push(currentInputObj);
-      });
-
-      this.billPrices?.forEach((element) => {
-        let currentInputObj = {
-          id: element.nativeElement?.attributes?.id?.value,
-          element: element
-        };
-
-        this.billPricesDic.push(currentInputObj);
-      });
-
-      this.spinnerService.hideSpinner();
-    }, 2000);
+  openNew() {
+    this.dialogTitle = 'New Bill';
+    this.billForm = {
+      id: null,
+      name: '',
+      price: null,
+      frequency: 'monthly',
+      dueDay: 1,
+      dueMonth: 1,
+      dueDayOfWeek: 0
+    };
+    this.billDialog = true;
   }
 
-  save(billId: any) {
+  editBill(bill: any) {
+    this.dialogTitle = 'Edit Bill';
+    this.billForm = {
+      id: bill.id || bill._id,
+      name: bill.name,
+      price: bill.price,
+      frequency: bill.frequency || 'monthly',
+      dueDay: bill.dueDay || 1,
+      dueMonth: bill.dueMonth || 1,
+      dueDayOfWeek: bill.dueDayOfWeek || 0
+    };
+    this.billDialog = true;
+  }
 
-    let currentBillNameValue = this.billNamesDic.find(bill => bill.id === billId)?.element?.nativeElement?.value;
-    let currentBillPriceValue = this.billPricesDic.find(bill => bill.id === billId)?.element?.nativeElement?.value;
-    
-    if (this.authToken && !this.codeUtil.isStringNullOrEmpty(currentBillNameValue) && !this.codeUtil.isStringNullOrEmpty(currentBillPriceValue)) {
-      let bill = {
-        _id: billId,
-        name: currentBillNameValue,
-        price: currentBillPriceValue
-      };
+  hideDialog() {
+    this.billDialog = false;
+  }
 
-      console.log(this.authToken);
+  saveBill() {
+    if (!this.authToken || this.codeUtil.isStringNullOrEmpty(this.billForm.name) || !this.billForm.price) {
+      this.messageService.add({ severity: 'warn', summary: 'Validation', detail: 'Name and Price are required' });
+      return;
+    }
 
-      this.billService.updateBill(this.authToken, bill).pipe(
+    // Convert fields to numbers to ensure correct JSON payload
+    let payload = { ...this.billForm };
+    if (payload.dueDay) payload.dueDay = Number(payload.dueDay);
+    if (payload.dueMonth) payload.dueMonth = Number(payload.dueMonth);
+    if (payload.dueDayOfWeek) payload.dueDayOfWeek = Number(payload.dueDayOfWeek);
+
+    if (this.billForm.id) {
+      this.billService.updateBill(this.authToken, payload).pipe(
         concatMap((response: any) => {
           this.messageService.add({ severity: 'success', summary: 'Saved', detail: 'Bill Updated' });
+          this.loadBills();
+          this.hideDialog();
           return new BehaviorSubject<boolean>(true);
         }),
         catchError((err: any) => {
           this.messageService.add({ severity: 'error', summary: 'Not Saved', detail: 'There was an error updating bill' });
-          console.log(err);
           return new BehaviorSubject<boolean>(false);
         })
       ).subscribe();
-    }
-    
-  }
-
-  addNewBill() {
-    let newBill = {
-      name: this.newBillName,
-      price: this.newBillPrice
-    };
-
-    if (this.authToken) {
-      this.billService.saveNewBill(this.authToken, newBill).pipe(
+    } else {
+      this.billService.saveNewBill(this.authToken, payload).pipe(
         concatMap((response: any) => {
           this.messageService.add({ severity: 'success', summary: 'Saved', detail: 'New Bill Added' });
+          this.loadBills();
+          this.hideDialog();
           return new BehaviorSubject<boolean>(true);
         }),
         catchError((err: any) => {
           this.messageService.add({ severity: 'error', summary: 'Not Saved', detail: 'There was an error saving new bill' });
-          console.log(err);
           return new BehaviorSubject<boolean>(false);
         })
       ).subscribe();
     }
   }
 
-  showNewBill() {
-    this.showNewBillDialog = !this.showNewBillDialog;
+  delete(billId: any) {
+    if (this.authToken) {
+      this.billService.deleteBill(this.authToken, billId).pipe(
+        concatMap((response: any) => {
+          this.messageService.add({ severity: 'success', summary: 'Deleted', detail: 'Bill Deleted Successfully' });
+          this.loadBills();
+          return new BehaviorSubject<boolean>(true);
+        }),
+        catchError((err: any) => {
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'There was an error deleting bill' });
+          return new BehaviorSubject<boolean>(false);
+        })
+      ).subscribe();
+    }
   }
 }
