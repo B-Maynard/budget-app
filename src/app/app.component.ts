@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
-import { sessionConfig } from './configs/session.config';
+import { AuthService } from './services/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -9,11 +9,15 @@ import { sessionConfig } from './configs/session.config';
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'budget-app';
+  isAuthenticated = false;
 
-  constructor(
-  ) { }
+  constructor(private authService: AuthService) { }
 
-
+  ngOnInit() {
+    this.authService.isAuthenticated$.subscribe(status => {
+      this.isAuthenticated = status;
+    });
+  }
 }

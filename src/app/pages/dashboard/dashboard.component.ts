@@ -10,8 +10,8 @@ import { BillsService } from '../../services/bills.service';
 import { PaydaysService } from '../../services/paydays.service';
 import { AppConfigService } from '../../services/app-config.service';
 import { sessionConfig } from '../../configs/session.config';
-import { Bill, CurrentBillConfig } from './dashboard.interface';
 import { BehaviorSubject, catchError, concatMap, Subscription, forkJoin } from 'rxjs';
+import { AuthService } from '../../services/auth.service';
 import { CardModule } from 'primeng/card';
 import { DividerModule } from 'primeng/divider';
 import { CurrencyPipe, DatePipe } from '@angular/common';
@@ -80,7 +80,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private messageService: MessageService,
     private billsService: BillsService,
     private paydaysService: PaydaysService,
-    private appConfigService: AppConfigService
+    private appConfigService: AppConfigService,
+    private authService: AuthService
   ) { }
 
   ngOnDestroy(): void {
@@ -131,12 +132,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
           }
 
           this.hasAuthToken = true;
+          this.authService.setAuthenticated(true);
           return new BehaviorSubject<boolean>(true);
         }),
         catchError(err => {
           this.hasAuthToken = false;
           this.authToken = null;
           sessionStorage.removeItem(sessionConfig.dbAccessToken);
+          this.authService.logout();
           console.log(err);
           return new BehaviorSubject<boolean>(false);
         })
