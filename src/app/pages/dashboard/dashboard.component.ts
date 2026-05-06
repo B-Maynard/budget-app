@@ -175,8 +175,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.filterPaydaysByMonth();
   }
 
-  onCalendarModelChange(newDates: Date[]) {
+  onCalendarModelChange(newDates: Date[] | null) {
     if (!this.authToken) return;
+
+    if (!newDates) {
+      newDates = [];
+    }
 
     let newDateStrs = newDates.map(d => this.formatDate(d));
     let oldDateStrs = this.paydays.map((p: any) => p.date);
