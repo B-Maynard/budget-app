@@ -1,2 +1,22 @@
-<app-spinner></app-spinner>
-<router-outlet></router-outlet>
+<div class="app-container">
+  <div class="main-content">
+    <router-outlet></router-outlet>
+  </div>
+
+  @if (isAuthenticated) {
+  <nav class="bottom-nav">
+    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item">
+      <i class="bx bx-home"></i>
+      <span>Dashboard</span>
+    </a>
+    <a routerLink="/update" routerLinkActive="active" class="nav-item">
+      <i class="bx bx-list-ul"></i>
+      <span>Bills</span>
+    </a>
+    <a routerLink="/billtotal" routerLinkActive="active" class="nav-item">
+      <i class="bx bx-pie-chart-alt-2"></i>
+      <span>Totals</span>
+    </a>
+  </nav>
+  }
+</div>

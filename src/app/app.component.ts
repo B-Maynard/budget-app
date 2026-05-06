@@ -1,20 +1,23 @@
 import { Component, OnInit } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { sessionConfig } from './configs/session.config';
-import { SpinnerComponent } from "./components/spinner/spinner.component";
+import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { AuthService } from './services/auth.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, SpinnerComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'budget-app';
+  isAuthenticated = false;
 
-  constructor(
-  ) {}
+  constructor(private authService: AuthService) { }
 
-
+  ngOnInit() {
+    this.authService.isAuthenticated$.subscribe(status => {
+      this.isAuthenticated = status;
+    });
+  }
 }

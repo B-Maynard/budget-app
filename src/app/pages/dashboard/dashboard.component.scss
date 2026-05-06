@@ -14,15 +14,20 @@ $shadow-color: rgba(0, 0, 0, 0.4);
 .dashboard-wrapper {
   padding: 1rem;
   max-width: 1200px;
+  width: 100%;
   margin: 0 auto;
   min-height: 100vh;
   box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 .dashboard-container {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* Base Card Styling for PrimeNG */
@@ -118,10 +123,26 @@ $shadow-color: rgba(0, 0, 0, 0.4);
   display: grid;
   grid-template-columns: 1fr;
   gap: 1.5rem;
+  width: 100%;
 
   @media (min-width: 992px) {
     grid-template-columns: 1fr 1fr;
     align-items: start;
+  }
+}
+
+.layout-column {
+  min-width: 0;
+  width: 100%;
+}
+
+.calendar-container {
+  max-width: 100%;
+  overflow-x: auto;
+  /* Hide scrollbar for cleaner look if it does scroll */
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
   }
 }
 
