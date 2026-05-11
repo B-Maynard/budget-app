@@ -380,8 +380,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
       originalBill.paidDates = originalBill.paidDates.filter((d: string) => d !== bill.occurrenceDate);
     }
 
-    // Re-stringify for simple-array TypeORM column handling if needed, but NestJS typically handles it. 
-    // Wait, simple-array expects string[] from the client, so we send the array.
+    // Ensure price is sent as a number to satisfy backend validation
+    if (originalBill.price) {
+      originalBill.price = Number(originalBill.price);
+    }
 
     this.billsService.updateBill(this.authToken!, originalBill).subscribe(() => {
       this.generateBillsForCycle();

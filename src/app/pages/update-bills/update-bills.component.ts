@@ -123,6 +123,7 @@ export class UpdateBillsComponent implements OnInit {
 
     // Convert fields to numbers to ensure correct JSON payload
     let payload = { ...this.billForm };
+    if (payload.price) payload.price = Number(payload.price);
     if (payload.dueDay) payload.dueDay = Number(payload.dueDay);
     if (payload.dueMonth) payload.dueMonth = Number(payload.dueMonth);
     if (payload.dueDayOfWeek) payload.dueDayOfWeek = Number(payload.dueDayOfWeek);
