@@ -14,9 +14,9 @@ export class AppConfigService {
         return this.httpClient.get(apiConfig.databaseRootPath + '/config', {headers: headers});
     }
 
-    updateIncome(authToken: string, income: number) {
+    updateConfig(authToken: string, payload: any) {
         let headers = new HttpHeaders();
         headers = headers.append("authToken", authToken);
-        return this.httpClient.patch(apiConfig.databaseRootPath + '/config', { income }, {headers: headers});
+        return this.httpClient.patch(apiConfig.databaseRootPath + '/config', payload, {headers: headers});
     }
 }

@@ -10,8 +10,8 @@ import { BillsService } from '../../services/bills.service';
 import { PaydaysService } from '../../services/paydays.service';
 import { AppConfigService } from '../../services/app-config.service';
 import { sessionConfig } from '../../configs/session.config';
-import { Bill, CurrentBillConfig } from './dashboard.interface';
 import { BehaviorSubject, catchError, concatMap, Subscription, forkJoin } from 'rxjs';
+import { AuthService } from '../../services/auth.service';
 import { CardModule } from 'primeng/card';
 import { DividerModule } from 'primeng/divider';
 import { CurrencyPipe, DatePipe } from '@angular/common';
@@ -80,7 +80,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private messageService: MessageService,
     private billsService: BillsService,
     private paydaysService: PaydaysService,
-    private appConfigService: AppConfigService
+    private appConfigService: AppConfigService,
+    private authService: AuthService
   ) { }
 
   ngOnDestroy(): void {
@@ -104,6 +105,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
           this.bills = response.bills;
           this.paydays = response.paydays;
           this.income = Number(response.config.income) || 0;
+          this.spendingOffset = Number(response.config.spendingOffset) || 0;
+          this.currentPurchases = response.config.currentPurchases || [];
+          
+          this.purchaseTotal = 0;
+          if (this.currentPurchases && this.currentPurchases.length > 0) {
+            this.currentPurchases.forEach(p => {
+               this.purchaseTotal += Number(p.price);
+            });
+          }
 
           // Build the dates array for the calendar from saved paydays
           this.paydayDates = this.paydays.map((p: any) => {
@@ -119,24 +129,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
           this.calculateCycle();
           this.filterPaydaysByMonth();
 
-          if (localStorage.getItem(sessionConfig.localStorage.currentBills)) {
-            let currentBillObj = JSON.parse(localStorage.getItem(sessionConfig.localStorage.currentBills)!);
-            this.spendingOffset = currentBillObj.spendingOffset;
-            this.purchaseTotal = currentBillObj.purchaseTotal;
-          }
-
-          if (localStorage.getItem(sessionConfig.localStorage.currentPurchases)) {
-            let currentPurchasesObj = JSON.parse(localStorage.getItem(sessionConfig.localStorage.currentPurchases)!);
-            this.currentPurchases = currentPurchasesObj;
-          }
-
           this.hasAuthToken = true;
+          this.authService.setAuthenticated(true);
           return new BehaviorSubject<boolean>(true);
         }),
         catchError(err => {
           this.hasAuthToken = false;
           this.authToken = null;
           sessionStorage.removeItem(sessionConfig.dbAccessToken);
+          this.authService.logout();
           console.log(err);
           return new BehaviorSubject<boolean>(false);
         })
@@ -155,8 +156,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   saveIncome() {
     if (!this.authToken) return;
-    this.appConfigService.updateIncome(this.authToken, this.income).subscribe(() => {
+    this.appConfigService.updateConfig(this.authToken, { income: this.income }).subscribe(() => {
       this.messageService.add({ severity: 'success', summary: 'Saved', detail: 'Income updated' });
+    });
+  }
+
+  saveOffset() {
+    if (!this.authToken) return;
+    this.appConfigService.updateConfig(this.authToken, { spendingOffset: this.spendingOffset }).subscribe(() => {
+      this.messageService.add({ severity: 'success', summary: 'Saved', detail: 'Spending offset updated' });
     });
   }
 
@@ -175,8 +183,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.filterPaydaysByMonth();
   }
 
-  onCalendarModelChange(newDates: Date[]) {
+  onCalendarModelChange(newDates: Date[] | null) {
     if (!this.authToken) return;
+
+    if (!newDates) {
+      newDates = [];
+    }
 
     let newDateStrs = newDates.map(d => this.formatDate(d));
     let oldDateStrs = this.paydays.map((p: any) => p.date);
@@ -402,7 +414,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.purchaseTotal += this.purchase;
     }
 
-    localStorage.setItem(sessionConfig.localStorage.currentPurchases, JSON.stringify(this.currentPurchases));
+    if (this.authToken) {
+      this.appConfigService.updateConfig(this.authToken, { currentPurchases: this.currentPurchases }).subscribe();
+    }
     this.purchase = null;
     this.purchaseName = '';
   }
@@ -432,7 +446,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.purchaseName = '';
 
     this.currentPurchases = [];
-    localStorage.setItem(sessionConfig.localStorage.currentPurchases, JSON.stringify([]));
+    if (this.authToken) {
+      this.appConfigService.updateConfig(this.authToken, { spendingOffset: 0, currentPurchases: [] }).subscribe();
+    }
   }
 
 }

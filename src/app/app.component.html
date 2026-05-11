@@ -1,10 +1,9 @@
-<app-spinner></app-spinner>
-
 <div class="app-container">
   <div class="main-content">
     <router-outlet></router-outlet>
   </div>
 
+  @if (isAuthenticated) {
   <nav class="bottom-nav">
     <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item">
       <i class="bx bx-home"></i>
@@ -19,4 +18,5 @@
       <span>Totals</span>
     </a>
   </nav>
+  }
 </div>

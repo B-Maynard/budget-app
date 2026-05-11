@@ -43,7 +43,10 @@
           <div class="purchases-controls">
             <div class="control-group">
               <span class="label">Spending Offset</span>
-              <input class="w-full" type="number" pInputText [(ngModel)]="spendingOffset" placeholder="0.00" />
+              <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <input class="w-full" type="number" pInputText [(ngModel)]="spendingOffset" placeholder="0.00" />
+                <p-button (onClick)="saveOffset()" icon="bx bx-save" [rounded]="true" [text]="true" severity="success" pTooltip="Save Offset" />
+              </div>
             </div>
 
             <div class="purchase-inputs">
