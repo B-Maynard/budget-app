@@ -11,7 +11,7 @@
           <span class="label">Income</span>
           <div style="display: flex; gap: 0.5rem; align-items: center;">
             <input type="number" pInputText [(ngModel)]="income" placeholder="0.00" />
-            <p-button (onClick)="saveIncome()" icon="bx bx-save" [rounded]="true" [text]="true" severity="success" pTooltip="Save Income" />
+            <p-button (onClick)="saveIncome()" icon="bx bx-save" [rounded]="true" [text]="true" severity="success" />
           </div>
         </div>
       </div>
@@ -45,7 +45,7 @@
               <span class="label">Spending Offset</span>
               <div style="display: flex; gap: 0.5rem; align-items: center;">
                 <input class="w-full" type="number" pInputText [(ngModel)]="spendingOffset" placeholder="0.00" />
-                <p-button (onClick)="saveOffset()" icon="bx bx-save" [rounded]="true" [text]="true" severity="success" pTooltip="Save Offset" />
+                <p-button (onClick)="saveOffset()" icon="bx bx-save" [rounded]="true" [text]="true" severity="success" />
               </div>
             </div>
 
@@ -145,8 +145,7 @@
                 <span class="bill-price-display" style="font-weight: bold; font-size: 1.1rem;">{{ bill?.price | currency
                   }}</span>
                 <p-button (onClick)="togglePaid(bill)" [icon]="bill.isPaid ? 'bx bx-undo' : 'bx bx-check'"
-                  [rounded]="true" [text]="true" [severity]="bill.isPaid ? 'secondary' : 'success'"
-                  pTooltip="{{bill.isPaid ? 'Mark Unpaid' : 'Mark Paid'}}" />
+                  [rounded]="true" [text]="true" [severity]="bill.isPaid ? 'secondary' : 'success'" />
               </div>
             </div>
             }
