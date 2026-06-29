@@ -1,8 +1,6 @@
+import { environment } from '../../environments/environment';
+
 export const apiConfig = {
-
-    //database apis
-    databaseRootPath: "",
-
-    // bills
+    databaseRootPath: environment.databaseRootPath,
     getBills: "/bills",
 };
