@@ -7,9 +7,8 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const allowedOrigins = [
-    'http://localhost:4200', 
-    'https://bailey-budget.glitch.me',
-    'https://bailey-budget.netlify.app'
+    'http://localhost:4200',
+    'https://bill.baileymaynard.com',
   ];
 
   const corsOptions: CorsOptions = {
