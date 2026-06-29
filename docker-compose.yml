@@ -12,6 +12,8 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+    networks:
+      - app
 
   api:
     build: ./backend
@@ -27,6 +29,8 @@ services:
         condition: service_healthy
     ports:
       - "3000:3000"
+    networks:
+      - app
 
   frontend:
     build: ./frontend
@@ -35,9 +39,11 @@ services:
     depends_on:
       - api
     networks:
+      - app
       - nginx_default
 
 networks:
+  app:
   nginx_default:
     external: true
 
