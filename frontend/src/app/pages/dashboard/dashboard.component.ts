@@ -328,6 +328,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   getOccurrences(bill: any, start: Date, end: Date): string[] {
     let dates: string[] = [];
     let current = new Date(start);
+    let interval = bill.interval || 1;
 
     // Give a safety limit to avoid infinite loops
     let limit = 0;
@@ -344,18 +345,21 @@ export class DashboardComponent implements OnInit, OnDestroy {
         }
 
         // Move to the first day of next month to continue checking
-        current = new Date(current.getFullYear(), current.getMonth() + 1, 1);
+        current = new Date(current.getFullYear(), current.getMonth() + interval, 1);
       } else if (bill.frequency === 'weekly') {
         if (current.getDay() === bill.dueDayOfWeek) {
           dates.push(this.formatDate(current));
+          // ponytail: step by interval*7 after a match to skip N weeks
+          current.setDate(current.getDate() + interval * 7);
+        } else {
+          current.setDate(current.getDate() + 1);
         }
-        current.setDate(current.getDate() + 1);
       } else if (bill.frequency === 'yearly') {
         let targetDate = new Date(current.getFullYear(), bill.dueMonth - 1, bill.dueDay);
         if (targetDate >= start && targetDate < end) {
           dates.push(this.formatDate(targetDate));
         }
-        current = new Date(current.getFullYear() + 1, 0, 1);
+        current = new Date(current.getFullYear() + interval, 0, 1);
       } else {
         break; // one-time
       }

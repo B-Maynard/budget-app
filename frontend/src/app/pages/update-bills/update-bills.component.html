@@ -52,6 +52,13 @@
         </select>
       </div>
 
+      @if (billForm.frequency !== 'one-time') {
+        <div class="field" style="display: flex; flex-direction: column;">
+          <label for="interval" style="margin-bottom: 0.5rem;">Every {{billForm.interval || 1}} {{billForm.frequency === 'monthly' ? 'month(s)' : billForm.frequency === 'weekly' ? 'week(s)' : 'year(s)'}}</label>
+          <input id="interval" type="number" pInputText [(ngModel)]="billForm.interval" min="1" />
+        </div>
+      }
+
       @if (billForm.frequency === 'monthly') {
         <div class="field" style="display: flex; flex-direction: column;">
           <label for="dueDay" style="margin-bottom: 0.5rem;">Due Day (1-31)</label>

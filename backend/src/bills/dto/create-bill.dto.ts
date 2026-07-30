@@ -13,6 +13,9 @@ export class CreateBillDto {
     frequency?: string;
 
     @IsNumber()
+    interval?: number;
+
+    @IsNumber()
     dueDay?: number;
 
     @IsNumber()

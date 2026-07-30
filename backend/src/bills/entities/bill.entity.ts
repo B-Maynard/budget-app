@@ -22,6 +22,9 @@ export class Bill {
   @Column({ default: 'monthly' })
   frequency: string;
 
+  @Column({ default: 1 })
+  interval: number;
+
   @Column({ nullable: true })
   dueDay: number;
 

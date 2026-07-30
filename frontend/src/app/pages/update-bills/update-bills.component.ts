@@ -50,6 +50,7 @@ export class UpdateBillsComponent implements OnInit {
     name: '',
     price: null,
     frequency: 'monthly',
+    interval: 1,
     dueDay: 1,
     dueMonth: 1,
     dueDayOfWeek: 0
@@ -90,6 +91,7 @@ export class UpdateBillsComponent implements OnInit {
       name: '',
       price: null,
       frequency: 'monthly',
+      interval: 1,
       dueDay: 1,
       dueMonth: 1,
       dueDayOfWeek: 0
@@ -104,6 +106,7 @@ export class UpdateBillsComponent implements OnInit {
       name: bill.name,
       price: bill.price,
       frequency: bill.frequency || 'monthly',
+      interval: bill.interval || 1,
       dueDay: bill.dueDay || 1,
       dueMonth: bill.dueMonth || 1,
       dueDayOfWeek: bill.dueDayOfWeek || 0
@@ -127,6 +130,7 @@ export class UpdateBillsComponent implements OnInit {
     if (payload.dueDay) payload.dueDay = Number(payload.dueDay);
     if (payload.dueMonth) payload.dueMonth = Number(payload.dueMonth);
     if (payload.dueDayOfWeek) payload.dueDayOfWeek = Number(payload.dueDayOfWeek);
+    if (payload.interval) payload.interval = Number(payload.interval);
 
     if (this.billForm.id) {
       this.billService.updateBill(this.authToken, payload).pipe(
