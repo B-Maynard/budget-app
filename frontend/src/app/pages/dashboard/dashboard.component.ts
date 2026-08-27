@@ -18,6 +18,7 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
 import { PasswordModule } from 'primeng/password';
 import { DatePickerModule } from 'primeng/datepicker';
 import { TooltipModule } from 'primeng/tooltip';
+import { TransactionsService } from '../../services/transactions.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -50,6 +51,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public income: number = 0;
   public billTotal: number = 0;
   public spendingOffset: number = 0;
+  public transactionSpending: number = 0;
+  public transactionError = '';
 
   public purchase: number | null = 0;
   public purchaseName: string | null = '';
@@ -81,7 +84,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private billsService: BillsService,
     private paydaysService: PaydaysService,
     private appConfigService: AppConfigService,
-    private authService: AuthService
+    private authService: AuthService,
+    private transactionsService: TransactionsService
   ) { }
 
   ngOnDestroy(): void {
@@ -127,6 +131,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
           this.calendarDefaultDate = new Date();
 
           this.calculateCycle();
+          this.loadTransactionSpending();
           this.filterPaydaysByMonth();
 
           this.hasAuthToken = true;
@@ -145,6 +150,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     return new BehaviorSubject<boolean>(false);
+  }
+
+  private loadTransactionSpending() {
+    this.transactionError = '';
+    this.transactionsService.getDashboard({
+      startDate: this.currentCycleStart ? this.formatDate(this.currentCycleStart) : undefined,
+      endDate: this.currentCycleEnd ? this.formatDate(this.currentCycleEnd) : undefined
+    }).subscribe({
+      next: response => this.transactionSpending = response.kpis.outflow / 100,
+      error: () => this.transactionError = 'Transaction spending could not be loaded.'
+    });
   }
 
   saveToken() {
@@ -253,6 +269,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.currentCycleEnd = null;
       this.generatedBills = [];
       this.billTotal = 0;
+      this.transactionSpending = 0;
       return;
     }
 

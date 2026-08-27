@@ -7,6 +7,9 @@ import { BillsModule } from './bills/bills.module';
 import { PaydaysModule } from './paydays/paydays.module';
 import { AppConfigModule } from './config/app-config.module';
 import dataSource from './data-source';
+import { BankingModule } from './banking/banking.module';
+import { DebtsModule } from './debts/debts.module';
+import { AnalysisModule } from './analysis/analysis.module';
 
 @Module({
   imports: [
@@ -18,6 +21,9 @@ import dataSource from './data-source';
     BillsModule,
     PaydaysModule,
     AppConfigModule,
+    BankingModule,
+    DebtsModule,
+    AnalysisModule,
   ],
   controllers: [AppController],
   providers: [AppService],

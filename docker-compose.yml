@@ -24,11 +24,18 @@ services:
       POSTGRES_PASSWORD: postgrespassword
       POSTGRES_DB: budget_app
       TOKEN: ${TOKEN:?TOKEN must be set in .env}
+      OLLAMA_URL: ${OLLAMA_URL:-http://host.docker.internal:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-gemma4:e2b}
+      HERMES_URL: ${HERMES_URL:-}
+      HERMES_MODEL: ${HERMES_MODEL:-}
+      HERMES_API_KEY: ${HERMES_API_KEY:-}
     depends_on:
       db:
         condition: service_healthy
     ports:
       - "3000:3000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - app
 

@@ -4,6 +4,13 @@ import { DataSource } from 'typeorm';
 import { Bill } from './bills/entities/bill.entity';
 import { Payday } from './paydays/entities/payday.entity';
 import { AppConfig } from './config/entities/app-config.entity';
+import { BankImport } from './banking/entities/bank-import.entity';
+import { BankTransaction } from './banking/entities/bank-transaction.entity';
+import { CategoryLimit } from './banking/entities/category-limit.entity';
+import { CategoryRule } from './banking/entities/category-rule.entity';
+import { DescriptionObfuscation } from './banking/entities/description-obfuscation.entity';
+import { Debt } from './banking/entities/debt.entity';
+import { AiJob } from './banking/entities/ai-job.entity';
 
 export default new DataSource({
   type: 'postgres',
@@ -12,7 +19,7 @@ export default new DataSource({
   username: process.env.POSTGRES_USER || 'postgres',
   password: process.env.POSTGRES_PASSWORD || 'postgrespassword',
   database: process.env.POSTGRES_DB || 'budget_app',
-  entities: [Bill, Payday, AppConfig],
+  entities: [Bill, Payday, AppConfig, BankImport, BankTransaction, CategoryLimit, CategoryRule, DescriptionObfuscation, Debt, AiJob],
   migrations: [__dirname + '/migrations/*.{ts,js}'],
   synchronize: false,
 });

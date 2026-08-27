@@ -24,6 +24,7 @@
     "migration:run": "npm run typeorm -- migration:run -d src/data-source.ts",
     "migration:revert": "npm run typeorm -- migration:revert -d src/data-source.ts",
     "migration:show": "npm run typeorm -- migration:show -d src/data-source.ts",
+    "migrate:bank-sqlite": "ts-node src/scripts/migrate-bank-sqlite.ts",
     "pretest:e2e": "npm run migration:run"
   },
   "dependencies": {
