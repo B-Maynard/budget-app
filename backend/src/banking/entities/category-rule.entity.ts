@@ -4,5 +4,5 @@ import { Column, Entity, PrimaryColumn } from 'typeorm';
 export class CategoryRule {
   @PrimaryColumn('text') pattern: string;
   @Column('varchar') category: string;
-  @Column('timestamptz') updatedAt: Date;
+  @Column('timestamptz', { name: 'updated_at' }) updatedAt: Date;
 }

@@ -14,15 +14,15 @@ export class AddNativeBanking1788000000000 implements MigrationInterface {
         CREATE TABLE "bank_imports" (
           "id" integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           "filename" text NOT NULL,
-          "accountLabel" text,
-          "accountNumber" text,
-          "accountType" text,
+          "account_label" text,
+          "account_number" text,
+          "account_type" text,
           "sha256" char(64) NOT NULL UNIQUE,
-          "minDate" date,
-          "maxDate" date,
-          "rowCount" integer NOT NULL CHECK ("rowCount" >= 0),
-          "createdAt" timestamptz NOT NULL DEFAULT now(),
-          "importStatus" varchar NOT NULL DEFAULT 'completed' CHECK ("importStatus" IN ('pending', 'categorizing', 'completed', 'failed'))
+          "min_date" date,
+          "max_date" date,
+          "row_count" integer NOT NULL CHECK ("row_count" >= 0),
+          "created_at" timestamptz NOT NULL DEFAULT now(),
+          "import_status" varchar NOT NULL DEFAULT 'completed' CHECK ("import_status" IN ('pending', 'categorizing', 'completed', 'failed'))
         )
       `);
     }
@@ -30,27 +30,27 @@ export class AddNativeBanking1788000000000 implements MigrationInterface {
       await queryRunner.query(`
         CREATE TABLE "bank_transactions" (
           "id" integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-          "importId" integer NOT NULL,
+          "import_id" integer NOT NULL,
           "date" date NOT NULL,
           "description" text NOT NULL,
-          "amountCents" integer NOT NULL,
+          "amount_cents" integer NOT NULL,
           "category" varchar NOT NULL DEFAULT 'Uncategorized',
-          "categoryManuallySet" boolean NOT NULL DEFAULT false,
-          CONSTRAINT "FK_bank_transactions_import" FOREIGN KEY ("importId") REFERENCES "bank_imports"("id") ON DELETE CASCADE
+          "category_manually_set" boolean NOT NULL DEFAULT false,
+          CONSTRAINT "FK_bank_transactions_import" FOREIGN KEY ("import_id") REFERENCES "bank_imports"("id") ON DELETE CASCADE
         )
       `);
     }
     await queryRunner.query(`CREATE INDEX IF NOT EXISTS "IDX_bank_transactions_date" ON "bank_transactions" ("date")`);
-    await queryRunner.query(`CREATE INDEX IF NOT EXISTS "IDX_bank_transactions_date_amount" ON "bank_transactions" ("date", "amountCents")`);
+    await queryRunner.query(`CREATE INDEX IF NOT EXISTS "IDX_bank_transactions_date_amount" ON "bank_transactions" ("date", "amount_cents")`);
     await queryRunner.query(`CREATE INDEX IF NOT EXISTS "IDX_bank_transactions_category" ON "bank_transactions" ("category")`);
-    await queryRunner.query(`CREATE INDEX IF NOT EXISTS "IDX_bank_transactions_import" ON "bank_transactions" ("importId")`);
+    await queryRunner.query(`CREATE INDEX IF NOT EXISTS "IDX_bank_transactions_import" ON "bank_transactions" ("import_id")`);
 
     if (!(await tableExists('category_limits'))) {
       await queryRunner.query(`
         CREATE TABLE "category_limits" (
           "category" varchar PRIMARY KEY,
-          "limitCents" integer NOT NULL CHECK ("limitCents" > 0),
-          "updatedAt" timestamptz NOT NULL
+          "limit_cents" integer NOT NULL CHECK ("limit_cents" > 0),
+          "updated_at" timestamptz NOT NULL
         )
       `);
     }
@@ -59,15 +59,15 @@ export class AddNativeBanking1788000000000 implements MigrationInterface {
         CREATE TABLE "category_rules" (
           "pattern" text PRIMARY KEY,
           "category" varchar NOT NULL,
-          "updatedAt" timestamptz NOT NULL
+          "updated_at" timestamptz NOT NULL
         )
       `);
     }
     if (!(await tableExists('description_obfuscations'))) {
       await queryRunner.query(`
         CREATE TABLE "description_obfuscations" (
-          "normalizedDescription" text PRIMARY KEY,
-          "obfuscatedKey" text NOT NULL UNIQUE
+          "normalized_description" text PRIMARY KEY,
+          "obfuscated_key" text NOT NULL UNIQUE
         )
       `);
     }
@@ -76,14 +76,14 @@ export class AddNativeBanking1788000000000 implements MigrationInterface {
         CREATE TABLE "debts" (
           "id" integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           "name" text NOT NULL,
-          "aprBps" integer NOT NULL CHECK ("aprBps" >= 0),
-          "startingBalanceCents" integer NOT NULL CHECK ("startingBalanceCents" >= 0),
-          "currentBalanceCents" integer NOT NULL CHECK ("currentBalanceCents" >= 0),
-          "paymentAmountCents" integer NOT NULL CHECK ("paymentAmountCents" > 0),
-          "paymentDay" integer NOT NULL CHECK ("paymentDay" BETWEEN 1 AND 28),
-          "lastAppliedMonth" date NOT NULL,
-          "createdAt" timestamptz NOT NULL,
-          "updatedAt" timestamptz NOT NULL
+          "apr_bps" integer NOT NULL CHECK ("apr_bps" >= 0),
+          "starting_balance_cents" integer NOT NULL CHECK ("starting_balance_cents" >= 0),
+          "current_balance_cents" integer NOT NULL CHECK ("current_balance_cents" >= 0),
+          "payment_amount_cents" integer NOT NULL CHECK ("payment_amount_cents" > 0),
+          "payment_day" integer NOT NULL CHECK ("payment_day" BETWEEN 1 AND 28),
+          "last_applied_month" date NOT NULL,
+          "created_at" timestamptz NOT NULL,
+          "updated_at" timestamptz NOT NULL
         )
       `);
     }
@@ -91,16 +91,16 @@ export class AddNativeBanking1788000000000 implements MigrationInterface {
       await queryRunner.query(`
         CREATE TABLE "ai_jobs" (
           "id" integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-          "startDate" date,
-          "endDate" date,
+          "start_date" date,
+          "end_date" date,
           "status" varchar NOT NULL CHECK ("status" IN ('queued', 'running', 'completed', 'failed')),
           "provider" varchar NOT NULL DEFAULT 'local' CHECK ("provider" IN ('local', 'cloud')),
-          "analysisType" varchar NOT NULL DEFAULT 'spending' CHECK ("analysisType" IN ('spending', 'debt')),
-          "createdAt" timestamptz NOT NULL,
-          "startedAt" timestamptz,
-          "completedAt" timestamptz,
+          "analysis_type" varchar NOT NULL DEFAULT 'spending' CHECK ("analysis_type" IN ('spending', 'debt')),
+          "created_at" timestamptz NOT NULL,
+          "started_at" timestamptz,
+          "completed_at" timestamptz,
           "error" text,
-          "result" text
+          "result_json" text
         )
       `);
     }

@@ -10,14 +10,14 @@ export class BankTransaction {
   @PrimaryGeneratedColumn('identity')
   id: number;
 
-  @Column('integer') importId: number;
+  @Column('integer', { name: 'import_id' }) importId: number;
   @Column('date') date: string;
   @Column('text') description: string;
-  @Column('integer') amountCents: number;
+  @Column('integer', { name: 'amount_cents' }) amountCents: number;
   @Column('varchar', { default: 'Uncategorized' }) category: string;
-  @Column('boolean', { default: false }) categoryManuallySet: boolean;
+  @Column('boolean', { default: false, name: 'category_manually_set' }) categoryManuallySet: boolean;
 
   @ManyToOne(() => BankImport, bankImport => bankImport.transactions, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'importId' })
+  @JoinColumn({ name: 'import_id' })
   import: BankImport;
 }
