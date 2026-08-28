@@ -25,7 +25,10 @@ export class CategorizationService {
         for (const row of batch) { const key = normalizeDescription(row.description); const category = saved.get(key) || categories.get(key) || keyword(row.description); if (category !== 'Uncategorized') await this.transactions.update({ id: row.id, category: 'Uncategorized', categoryManuallySet: false }, { category }); }
       }
       await this.imports.update(importId, { importStatus: 'completed' });
-    } catch { await this.imports.update(importId, { importStatus: 'failed' }); }
+    } catch (error) {
+      console.error('Categorization failed', { importId, error: error instanceof Error ? error.message : String(error) });
+      await this.imports.update(importId, { importStatus: 'failed' });
+    }
   }
   async updateTransactionCategory(id: number, category: string): Promise<void> { if (!(BANKING_CATEGORIES as readonly string[]).includes(category)) throw new Error('invalid category'); const row = await this.transactions.findOne({ where: { id } }); if (!row) throw new NotFoundException('not found'); await this.dataSource.transaction(async manager => { await manager.update(BankTransaction, id, { category, categoryManuallySet: true }); if (normalizeDescription(row.description)) await manager.upsert(CategoryRule, { pattern: normalizeDescription(row.description), category, updatedAt: new Date() }, ['pattern']); }); }
   private async ollama(rows: BankTransaction[]): Promise<Map<string, string>> { const prompt = `Classify each description into exactly one of ${BANKING_CATEGORIES.join(', ')}. Return only JSON mapping description to category.\n${JSON.stringify(rows.map(r => ({ description: r.description, amount_cents: r.amountCents })))} `; const response = await fetch(`${process.env.OLLAMA_URL!.replace(/\/$/, '')}/api/generate`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ model: process.env.OLLAMA_MODEL || 'llama3', prompt, format: 'json', stream: false }) }); if (!response.ok) throw new Error('Ollama failed'); const body = await response.json() as { response?: string }; const data = JSON.parse(body.response || '{}'); return new Map(Object.entries(data).filter(([, value]) => (BANKING_CATEGORIES as readonly string[]).includes(value as string)).map(([key, value]) => [normalizeDescription(key), value as string])); }
