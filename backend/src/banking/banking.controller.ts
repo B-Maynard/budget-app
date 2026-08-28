@@ -8,7 +8,7 @@ import { DashboardQuery } from './dto/dashboard-query.dto';
 import { SetCategoryLimitDto } from './dto/set-category-limit.dto';
 import { UpdateTransactionCategoryDto } from './dto/update-transaction-category.dto';
 
-@Controller('api')
+@Controller()
 export class BankingController {
   constructor(private readonly auth: AuthService, private readonly imports: ImportsService, private readonly categorization: CategorizationService, private readonly banking: BankingService) {}
   @Post('imports') @UseInterceptors(FileInterceptor('file')) import(@Headers() h: any, @UploadedFile() file: UploadedCsv, @Body('account_label') label?: string) { this.auth.determineNotAuth(h); return this.imports.importCsv(file, label); }

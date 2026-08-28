@@ -2,7 +2,7 @@ import { BadRequestException, Body, Controller, Get, Headers, Post, Query } from
 import { AuthService } from '../shared/auth.service';
 import { AnalysisService } from './analysis.service';
 
-@Controller('api/ai')
+@Controller('ai')
 export class AnalysisController {
   constructor(private readonly auth: AuthService, private readonly analysis: AnalysisService) {}
 

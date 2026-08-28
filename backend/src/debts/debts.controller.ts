@@ -4,7 +4,7 @@ import { CreateDebtDto } from './dto/create-debt.dto';
 import { UpdateDebtDto } from './dto/update-debt.dto';
 import { DebtsService } from './debts.service';
 
-@Controller('api/debts')
+@Controller('debts')
 export class DebtsController {
   constructor(private readonly auth: AuthService, private readonly debts: DebtsService) {}
 
