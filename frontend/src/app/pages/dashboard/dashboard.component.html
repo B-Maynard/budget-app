@@ -3,7 +3,6 @@
   <div class="dashboard-container">
     <p-toast />
     <p-confirmDialog />
-    @if (transactionError) { <p class="transaction-error">{{ transactionError }}</p> }
 
     <!-- Summary Section -->
     <p-card styleClass="summary-card">
@@ -27,9 +26,9 @@
         <div class="summary-item highlight-item">
           <span class="label">Money Available</span>
           <span class="value available-value"
-            [class.positive]="((income + spendingOffset) - (billTotal + purchaseTotal + transactionSpending)) > 0"
-            [class.negative]="((income + spendingOffset) - (billTotal + purchaseTotal + transactionSpending)) < 0">
-            {{ (income + spendingOffset) - (billTotal + purchaseTotal + transactionSpending) | currency }}
+            [class.positive]="((income + spendingOffset) - (billTotal + purchaseTotal)) > 0"
+            [class.negative]="((income + spendingOffset) - (billTotal + purchaseTotal)) < 0">
+            {{ (income + spendingOffset) - (billTotal + purchaseTotal) | currency }}
           </span>
         </div>
       </div>
