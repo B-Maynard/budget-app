@@ -24,7 +24,7 @@ export class ImportsService {
     const id = await this.dataSource.transaction(async manager => {
       const old = await manager.findOne(BankImport, { where: { sha256 } }); if (old) await manager.remove(old);
       const candidate = new Set(parsed.rows.map(r => `${r.date}|${r.amountCents}`));
-      const existing = await manager.createQueryBuilder(BankTransaction, 't').innerJoinAndSelect('t.import', 'i').where("t.date::text || '|' || t.amountCents::text IN (:...keys)", { keys: [...candidate] }).getMany();
+      const existing = await manager.createQueryBuilder(BankTransaction, 't').innerJoinAndSelect('t.import', 'i').where("t.date::text || '|' || t.amount_cents::text IN (:...keys)", { keys: [...candidate] }).getMany();
       const counts = new Map<string, number>(); existing.forEach(t => { const k = this.key(t.date, t.amountCents, t.description, t.import); counts.set(k, (counts.get(k) || 0) + 1); });
       const seen = new Map<string, number>(); const rows = parsed.rows.filter(r => { const k = this.key(r.date, r.amountCents, r.description, { accountLabel, accountNumber: parsed.accountNumber, accountType: parsed.accountType } as BankImport); const n = seen.get(k) || 0; seen.set(k, n + 1); return n === (counts.get(k) || 0); });
       const entity = manager.create(BankImport, { filename: file.originalname || 'upload.csv', accountLabel, accountNumber: parsed.accountNumber, accountType: parsed.accountType, sha256, minDate: rows.length ? rows.reduce((a, b) => a.date < b.date ? a : b).date : null, maxDate: rows.length ? rows.reduce((a, b) => a.date > b.date ? a : b).date : null, rowCount: rows.length, importStatus: 'pending' });

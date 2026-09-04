@@ -5,7 +5,7 @@ export class AddBillInterval1785419632805 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         const table = await queryRunner.getTable('bills');
-        if (!table.findColumnByName('interval')) {
+        if (table && !table.findColumnByName('interval')) {
             await queryRunner.query(`ALTER TABLE "bills" ADD "interval" integer NOT NULL DEFAULT 1`);
         }
     }
