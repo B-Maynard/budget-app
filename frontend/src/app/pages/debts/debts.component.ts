@@ -18,7 +18,7 @@ export class DebtsComponent implements OnInit {
   form = { name: '', apr: 0, starting: 0, payment: 0, day: 1 };
   today = todayIso(); allMonths = 18;
   plans: Record<number, Plan> = {}; results: Record<number, Result | null> = {};
-  income = 0; incomeNote = 'Loading…'; bills: any[] = [];
+  excluded = new Set<number>(); income = 0; incomeNote = 'Loading…'; bills: any[] = [];
   constructor(private service: DebtsService, private billsService: BillsService, private transactions: TransactionsService) {}
   ngOnInit() { this.load(); this.loadBudget(); }
   load() { this.loading = true; this.service.getDebts().subscribe({ next: d => { d.forEach(x => this.plans[x.id] ||= this.newPlan(x, this.allMonths)); this.debts = d; this.recalc(); }, error: () => this.error = 'Could not load debts.', complete: () => this.loading = false }); }
@@ -48,25 +48,31 @@ export class DebtsComponent implements OnInit {
   firstDate(d: Debt) { return paymentDate(d.paymentDay, 1, this.today); }
   recalc() {
     this.results = {};
-    for (const d of this.active) {
+    for (const d of this.included) {
       const p = this.plans[d.id], n = Math.floor(p.months), need = requiredPayment(d.currentBalanceCents, Math.round((p.apr || 0) * 100), n);
       this.results[d.id] = need && { ...need, lastDate: paymentDate(d.paymentDay, n, this.today) };
     }
   }
+  toggle(d: Debt) { this.excluded.has(d.id) ? this.excluded.delete(d.id) : this.excluded.add(d.id); this.recalc(); }
+  toggleAll() { this.excluded = this.excluded.size ? new Set() : new Set(this.active.map(d => d.id)); this.recalc(); }
+  planOnly(d: Debt) { this.excluded = new Set(this.active.filter(x => x.id !== d.id).map(x => x.id)); this.recalc(); document.getElementById('planner')?.scrollIntoView({ behavior: 'smooth' }); }
   applyPlan() {
     if (!confirm('Replace each debt\'s monthly payment with the planned amount?')) return;
-    const calls = this.active.filter(d => this.results[d.id]).map(d => this.service.updateDebt(d.id, { paymentAmountCents: this.results[d.id]!.payment }));
+    const calls = this.included.filter(d => this.results[d.id]).map(d => this.service.updateDebt(d.id, { paymentAmountCents: this.results[d.id]!.payment }));
     forkJoin(calls).subscribe({ next: () => this.load(), error: () => this.error = 'Could not apply plan.' });
   }
 
   get active() { return this.debts.filter(d => d.currentBalanceCents > 0); }
+  get included() { return this.active.filter(d => !this.excluded.has(d.id)); }
+  /** Payments on debts left out of the plan still come out of the budget. */
+  get otherPaymentsCents() { return this.active.filter(d => this.excluded.has(d.id)).reduce((s, d) => s + d.paymentAmountCents, 0); }
   get planned() { return Object.values(this.results).filter((r): r is Result => !!r); }
   get neededCents() { return this.planned.reduce((s, r) => s + r.payment, 0); }
   get interestCents() { return this.planned.reduce((s, r) => s + r.interest, 0); }
   get debtFreeDate() { return this.planned.map(r => r.lastDate).sort().pop() || ''; }
   /** Monthly bills, minus any bill named like a debt (that payment is already part of the plan). */
   get billsCents() { const debtNames = new Set(this.debts.map(d => d.name.trim().toLowerCase())); return Math.round(this.bills.filter(b => !debtNames.has(String(b.name).trim().toLowerCase())).reduce((s, b) => s + billMonthly(b), 0) * 100); }
-  get availableCents() { return Math.round((this.income || 0) * 100) - this.billsCents; }
+  get availableCents() { return Math.round((this.income || 0) * 100) - this.billsCents - this.otherPaymentsCents; }
   get totalBalance() { return this.debts.reduce((sum, d) => sum + d.currentBalanceCents, 0); }
   get totalPayment() { return this.debts.reduce((sum, d) => sum + d.paymentAmountCents, 0); }
 }

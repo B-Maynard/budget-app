@@ -1,25 +1,26 @@
 <main class="page"><h1>Debts</h1><p class="error" *ngIf="error">{{error}}</p><p *ngIf="loading">Loading…</p>
   <section class="kpis"><div><b>{{totalBalance | money}}</b><small>Total current balance</small></div><div><b>{{totalPayment | money}}</b><small>Total monthly payment</small></div></section>
 
-  <section class="card" *ngIf="active.length"><h2>Payoff planner</h2>
-    <p class="muted">Set when you want each debt gone and see what it takes per month, against what you can afford.</p>
+  <section class="card" id="planner" *ngIf="active.length"><h2>Payoff planner</h2>
+    <p class="muted">Tick the debts you want to plan, set when you want each gone, and see what it takes per month against what you can afford.</p>
     <div class="budget">
       <label>Monthly income $<input type="number" min="0" step=".01" [(ngModel)]="income" name="income"></label><span class="op">−</span>
-      <div><b>{{billsCents | money}}</b><small>Bills / month</small></div><span class="op">=</span>
+      <div><b>{{billsCents | money}}</b><small>Bills / month</small></div><ng-container *ngIf="otherPaymentsCents"><span class="op">−</span><div><b>{{otherPaymentsCents | money}}</b><small>Debts not in plan</small></div></ng-container><span class="op">=</span>
       <div><b [class.bad]="availableCents < 0">{{availableCents | money}}</b><small>Available for debt</small></div>
     </div>
     <p class="muted">{{incomeNote}} Bills are your recurring bills from the Bills page, converted to a monthly amount.</p>
 
-    <label class="all">Pay off everything in <input type="number" min="1" step="1" [ngModel]="allMonths" (ngModelChange)="setAll($event)" name="allMonths"> months</label>
-    <table><tr><th>Debt</th><th>Balance</th><th>APR %</th><th>Months</th><th>Pay off by</th><th>Needed / month</th><th>Now</th><th>Interest</th></tr>
-      <tr *ngFor="let d of active"><td>{{d.name}}</td><td>{{d.currentBalanceCents | money}}</td>
+    <label class="all">Pay off the selected debts in <input type="number" min="1" step="1" [ngModel]="allMonths" (ngModelChange)="setAll($event)" name="allMonths"> months</label>
+    <table><tr><th><input type="checkbox" title="Select all / none" [checked]="!excluded.size" (change)="toggleAll()"></th><th>Debt</th><th>Balance</th><th>APR %</th><th>Months</th><th>Pay off by</th><th>Needed / month</th><th>Now</th><th>Interest</th></tr>
+      <tr *ngFor="let d of active" [class.off]="excluded.has(d.id)"><td><input type="checkbox" [checked]="!excluded.has(d.id)" (change)="toggle(d)" [attr.aria-label]="'Include ' + d.name"></td><td>{{d.name}}</td><td>{{d.currentBalanceCents | money}}</td>
         <td><input class="num" type="number" min="0" step=".01" [(ngModel)]="plans[d.id].apr" (ngModelChange)="recalc()" name="apr{{d.id}}"></td>
         <td><input class="num" type="number" min="1" step="1" [ngModel]="plans[d.id].months" (ngModelChange)="setMonths(d, $event)" name="m{{d.id}}"></td>
         <td><input type="date" [min]="today" [ngModel]="plans[d.id].date" (ngModelChange)="setDate(d, $event)" name="d{{d.id}}"></td>
         <ng-container *ngIf="results[d.id] as r; else none"><td><b class="need">{{r.payment | money}}</b></td><td class="muted">{{d.paymentAmountCents | money}}</td><td>{{r.interest | money}}</td></ng-container>
-        <ng-template #none><td colspan="3" class="muted">Pick at least 1 month, or a date on/after {{firstDate(d)}}</td></ng-template></tr>
+        <ng-template #none><td colspan="3" class="muted">{{excluded.has(d.id) ? 'Not in plan' : 'Pick at least 1 month, or a date on/after ' + firstDate(d)}}</td></ng-template></tr>
     </table>
 
+    <p class="muted" *ngIf="!planned.length && !included.length">No debts selected.</p>
     <div class="verdict" *ngIf="planned.length" [class.bad]="availableCents < neededCents">
       <p class="big">Plan needs <b>{{neededCents | money}}</b> / month · debt-free by <b>{{debtFreeDate}}</b> · {{interestCents | money}} total interest</p>
       <p *ngIf="availableCents >= neededCents">Fits your budget with <b>{{availableCents - neededCents | money}}</b> / month left over.</p>
@@ -29,7 +30,7 @@
     </div>
   </section>
 
-  <section class="card"><table><tr><th>Name</th><th>APR</th><th>Starting</th><th>Current balance</th><th>Payment</th><th>Day</th><th></th></tr><tr *ngFor="let d of debts"><td>{{d.name}}</td><td>{{d.aprBps / 100 | number:'1.2-2'}}%</td><td>{{d.startingBalanceCents | money}}</td><td><input class="balance" type="number" min="0" [ngModel]="d.currentBalanceCents / 100" (ngModelChange)="d.currentBalanceCents = $event * 100" (blur)="updateBalance(d)"></td><td>{{d.paymentAmountCents | money}}</td><td>{{d.paymentDay}}</td><td><button class="link" (click)="edit(d)">Edit</button> <button class="link danger" (click)="remove(d)">Delete</button></td></tr></table></section>
+  <section class="card"><table><tr><th>Name</th><th>APR</th><th>Starting</th><th>Current balance</th><th>Payment</th><th>Day</th><th></th></tr><tr *ngFor="let d of debts"><td>{{d.name}}</td><td>{{d.aprBps / 100 | number:'1.2-2'}}%</td><td>{{d.startingBalanceCents | money}}</td><td><input class="balance" type="number" min="0" [ngModel]="d.currentBalanceCents / 100" (ngModelChange)="d.currentBalanceCents = $event * 100" (blur)="updateBalance(d)"></td><td>{{d.paymentAmountCents | money}}</td><td>{{d.paymentDay}}</td><td><button class="link" *ngIf="d.currentBalanceCents > 0" (click)="planOnly(d)">Plan only this</button> <button class="link" (click)="edit(d)">Edit</button> <button class="link danger" (click)="remove(d)">Delete</button></td></tr></table></section>
 
   <section class="card"><h2>{{editing === null ? 'Add debt' : 'Edit debt'}}</h2><form (ngSubmit)="submit()"><input required [(ngModel)]="form.name" name="name" placeholder="Name"><label>APR %<input required type="number" min="0" step=".01" [(ngModel)]="form.apr" name="apr"></label><label>Starting balance $<input required type="number" min="0" step=".01" [(ngModel)]="form.starting" name="starting"></label><label>Monthly payment $<input required type="number" min="0.01" step=".01" [(ngModel)]="form.payment" name="payment"></label><label>Payment day<input required type="number" min="1" max="28" [(ngModel)]="form.day" name="day"></label><button>{{editing === null ? 'Add' : 'Save'}}</button><button type="button" *ngIf="editing !== null" (click)="cancel()">Cancel</button></form></section>
 </main>
