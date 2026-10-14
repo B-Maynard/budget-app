@@ -1,43 +1,19 @@
-import { Component, ElementRef, OnInit, QueryList, ViewChildren } from '@angular/core';
-import { CardModule } from 'primeng/card';
-import { DividerModule } from 'primeng/divider';
+import { Component, OnInit } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { IconComponent } from '../../components/icon.component';
 import { BillsService } from '../../services/bills.service';
-import { SpinnerService } from '../../services/spinner.service';
 import { sessionConfig } from '../../configs/session.config';
-import { BehaviorSubject, catchError, concatMap } from 'rxjs';
-import { ButtonModule } from 'primeng/button';
-
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { TableModule } from 'primeng/table';
-import { ToastModule } from 'primeng/toast';
-import { InputTextModule } from 'primeng/inputtext';
 
 @Component({
   selector: 'app-billtotal',
   standalone: true,
-  imports: [
-    FormsModule,
-    TableModule,
-    ButtonModule,
-    ReactiveFormsModule,
-    FormsModule,
-    ToastModule,
-    InputTextModule,
-    CardModule,
-    DividerModule,
-    CurrencyPipe
-],
+  imports: [IconComponent, FormsModule, CurrencyPipe],
   templateUrl: './billtotal.component.html',
-  styleUrl: './billtotal.component.scss'
+  styleUrl: './billtotal.component.scss',
 })
 export class BillTotalComponent implements OnInit {
-
-  @ViewChildren('billName') billNames: QueryList<ElementRef> | undefined;
-  @ViewChildren('billPrice') billPrices: QueryList<ElementRef> | undefined;
-  
-  currentBills: any;
-  currentBillsDict: any[] = [];
+  currentBills: any[] = [];
   authToken: string | null = null;
 
   chosenBills: any[] = [];
@@ -47,15 +23,16 @@ export class BillTotalComponent implements OnInit {
 
   chosenBillPrice: number = 0;
 
-  constructor(
-    private billService: BillsService,
-  ) {}
+  constructor(private billService: BillsService) {}
 
   ngOnInit(): void {
     this.authToken = localStorage.getItem(sessionConfig.dbAccessToken);
     if (this.authToken) {
       this.billService.getBills(this.authToken).subscribe((response: any) => {
-        this.currentBills = response;
+        this.currentBills = response.map((bill: any) => ({
+          ...bill,
+          price: Number(bill.price),
+        }));
       });
     }
   }
@@ -63,13 +40,17 @@ export class BillTotalComponent implements OnInit {
   currentBillClick(bill: any) {
     this.chosenBillPrice += bill.price;
     this.chosenBills.push(bill);
-    this.currentBills = this.currentBills.filter((currentBill: { name: any; }) => currentBill.name !== bill.name)
+    this.currentBills = this.currentBills.filter(
+      (currentBill: { name: any }) => currentBill.name !== bill.name,
+    );
   }
 
   chosenBillClick(bill: any) {
     this.chosenBillPrice -= bill.price;
     this.currentBills.push(bill);
-    this.chosenBills = this.chosenBills.filter((currentBill: { name: any; }) => currentBill.name !== bill.name)
+    this.chosenBills = this.chosenBills.filter(
+      (currentBill: { name: any }) => currentBill.name !== bill.name,
+    );
   }
 
   billTotal() {

@@ -1,225 +1,109 @@
-/* Variables */
-$border-radius: 12px;
-$card-bg: #1e1e1e;
-$card-border: 1px solid rgba(255, 255, 255, 0.05);
-$shadow-color: rgba(0, 0, 0, 0.4);
-
-/* Utility overrides for PrimeNG */
-::ng-deep .w-full { width: 100% !important; }
-::ng-deep .mb-4 { margin-bottom: 1rem !important; }
-::ng-deep .flex-1 { flex: 1 !important; }
-
-/* The dashboard-wrapper and base elements will inherit global layouts from a shared structure, 
-   but since Angular scopes css per component, we re-apply the structural shell here. */
-.dashboard-wrapper {
-  padding: 1rem;
-  max-width: 1200px;
-  margin: 0 auto;
-  min-height: 100vh;
-  box-sizing: border-box;
-}
-
-.dashboard-container {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-/* Base Card Styling for PrimeNG */
-::ng-deep .p-card {
-  background-color: $card-bg;
-  border-radius: $border-radius;
-  border: $card-border;
-  box-shadow: 0 8px 32px $shadow-color;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  color: #e0e0e0;
-  overflow: hidden;
-
-  .p-card-header {
-    padding: 1.25rem 1.25rem 0 1.25rem;
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: #fff;
-  }
-}
-
-/* --- Summary Section --- */
-.summary-card {
-  ::ng-deep .p-card-body {
-    padding: 1.5rem;
-  }
-}
-
-.summary-grid {
+.totals-summary {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 1rem;
-
-  @media (min-width: 768px) {
-    grid-template-columns: 1fr 1fr;
-  }
-  
-  &.totals-grid {
-    @media (min-width: 768px) {
-      grid-template-columns: repeat(3, 1fr);
-    }
-  }
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 35px;
+  padding: 28px;
+  align-items: center;
 }
-
-.summary-item {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 0.5rem;
-  
-  &.input-item {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-
-    input {
-      width: 120px;
-      text-align: right;
-    }
-  }
-
-  .label {
-    font-size: 0.875rem;
-    color: rgba(255, 255, 255, 0.6);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .value {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: #fff;
-
-    &.positive { color: #4ade80; } /* Tailwind Green 400 */
-    &.negative { color: #f87171; } /* Tailwind Red 400 */
-  }
-}
-
-.highlight-item {
-  background: rgba(255,255,255,0.03);
-  padding: 1rem;
-  border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.05);
-  margin-top: 0.5rem;
-  
-  @media (min-width: 768px) {
-    margin-top: 0;
-  }
-}
-
-/* --- Main Layout --- */
-.dashboard-layout {
+.income-inputs {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
-
-  @media (min-width: 992px) {
-    grid-template-columns: 1fr 1fr;
-    align-items: start;
-  }
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
 }
-
-.action-buttons {
+.totals-balance {
+  border-left: 1px solid var(--line);
+  padding-left: 35px;
+}
+.totals-balance > span {
+  font-size: 13px;
+  color: var(--muted);
+}
+.available-value {
+  display: block;
+  font-size: clamp(30px, 3.3vw, 43px);
+  color: var(--accent);
+  font-weight: 550;
+  letter-spacing: -1.4px;
+  margin: 5px 0 18px;
+}
+.available-value.negative {
+  color: var(--danger);
+}
+.totals-balance > div {
   display: flex;
-  gap: 0.5rem;
+  justify-content: space-between;
+  font-size: 13px;
+  gap: 16px;
+}
+.totals-balance > div > span {
+  color: var(--muted);
+}
+.totals-lists {
+  margin-top: 28px;
+}
+.selection-row {
+  display: flex;
+  align-items: center;
   width: 100%;
+  gap: 13px;
+  text-align: left;
+  background: none;
+  color: var(--ink);
+  padding: 17px 0;
+  border: 0;
+  border-bottom: 1px solid var(--line);
 }
-
-/* --- Bills Section --- */
-.bills-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+.selection-row:last-child {
+  border-bottom: 0;
 }
-
-.bill-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255,255,255,0.05);
-  padding: 0.75rem;
-  border-radius: 8px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-
-  .bill-content {
-    flex: 1;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
-  }
-
-  .bill-name-display {
-    font-weight: 500;
-    font-size: 1.1rem;
-  }
-
-  .bill-price-display {
-    font-family: monospace;
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: #e0e0e0;
-  }
+.selection-row strong {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 14px;
+  font-weight: 550;
 }
-
-.selectable-bill {
-  cursor: pointer;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    background: rgba(255, 255, 255, 0.08);
+.selection-row > b {
+  font-weight: 550;
+}
+.selection-row > app-icon {
+  color: var(--muted);
+  width: 16px;
+  height: 16px;
+}
+.selection-row:hover {
+  color: var(--accent);
+}
+.selected .item-icon {
+  background: var(--success-soft);
+  color: var(--success);
+}
+@media (max-width: 1000px) {
+  .totals-summary {
+    gap: 25px;
   }
-
-  i {
-    transition: transform 0.2s ease;
+  .income-inputs {
+    grid-template-columns: minmax(0, 1fr);
   }
-
-  &:hover i.bx-chevron-left {
-    transform: translateX(-4px);
-    color: #4ade80 !important;
-  }
-
-  &.chosen:hover i.bx-chevron-right {
-    transform: translateX(4px);
+  .totals-balance {
+    padding-left: 25px;
   }
 }
-
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 3rem 1rem;
-  color: rgba(255, 255, 255, 0.4);
-  text-align: center;
-
-  i {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    opacity: 0.5;
+@media (max-width: 760px) {
+  .totals-summary {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 23px;
+    gap: 25px;
   }
-}
-
-/* Animations */
-.slide-in {
-  animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
+  .totals-balance {
+    border-left: 0;
+    border-top: 1px solid var(--line);
+    padding: 22px 0 0;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  .available-value {
+    font-size: 41px;
+  }
+  .selection-row strong {
+    font-size: 13px;
   }
 }

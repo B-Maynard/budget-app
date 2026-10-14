@@ -7,6 +7,8 @@ import { TransactionsComponent } from './pages/transactions/transactions.compone
 import { DebtsComponent } from './pages/debts/debts.component';
 
 export const routes: Routes = [
+    {path: 'mockups', loadComponent: () => import('./pages/mockups/mockups.component').then(m => m.MockupsComponent)},
+    {path: 'mockups/:concept', loadComponent: () => import('./pages/mockups/mockups.component').then(m => m.MockupsComponent)},
     {path: "", component: DashboardComponent},
     {path: "update", component: UpdateBillsComponent, canActivate: [authGuard]},
     {path: "billtotal", component: BillTotalComponent, canActivate: [authGuard]},

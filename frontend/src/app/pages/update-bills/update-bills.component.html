@@ -1,115 +1,153 @@
-<div class="dashboard-wrapper">
-  <p-toast />
-
-  <div class="dashboard-container">
-    <p-card header="Manage Bills" styleClass="bills-card">
-      <div class="action-buttons mb-4">
-        <p-button (onClick)="openNew()" label="New Bill" icon="bx bx-plus" class="flex-1" styleClass="w-full" />
-      </div>
-
-      <div class="search-container mb-4">
-        <span class="p-input-icon-left w-full">
-          <i class="bx bx-search"></i>
-          <input type="text" pInputText [(ngModel)]="searchTerm" placeholder="Search bills by name..." class="w-full" />
-        </span>
-      </div>
-
-      <div class="bills-list">
-        @for (bill of filteredBills; track bill.id || bill._id) {
-          <div class="bill-item slide-in" style="justify-content: space-between; align-items: center; padding: 1rem; border-radius: 8px; background: rgba(255,255,255,0.05); margin-bottom: 0.5rem; display: flex;">
-            <div class="bill-info">
-              <h3 style="margin: 0; font-size: 1.1rem; font-weight: 500;">{{bill.name}}</h3>
-              <p style="margin: 0; font-size: 0.9rem; color: #aaa;">{{bill.frequency | titlecase}} • {{bill.price | currency}}</p>
-            </div>
-            <div class="bill-actions">
-              <p-button (onClick)="editBill(bill)" icon="bx bx-pencil" [rounded]="true" [text]="true" severity="info" />
-              <p-button (onClick)="delete(bill.id || bill._id)" icon="bx bx-trash" [rounded]="true" [text]="true" severity="danger" />
-            </div>
-          </div>
-        }
-      </div>
-
-    </p-card>
+<p-toast />
+<main class="page">
+  <div class="page-heading">
+    <h1>Bills</h1>
+    <button class="primary-button" (click)="openNew()">
+      <app-icon name="plus" /> New bill
+    </button>
   </div>
-
-  <p-dialog [(visible)]="billDialog" [header]="dialogTitle" [modal]="true" [style]="{width: '90vw', maxWidth: '500px'}">
-    <div class="p-fluid grid gap-4 p-4" style="display: flex; flex-direction: column; gap: 1rem; padding-top: 1rem;">
-      <div class="field" style="display: flex; flex-direction: column;">
-        <label for="name" style="margin-bottom: 0.5rem;">Name</label>
-        <input id="name" type="text" pInputText [(ngModel)]="billForm.name" />
+  <section class="surface">
+    <div class="section-heading">
+      <span class="pill">{{ bills?.length || 0 }} bills</span
+      ><label class="bill-search"
+        ><app-icon name="search" /><input
+          [(ngModel)]="searchTerm"
+          placeholder="Search bills"
+          aria-label="Search bills"
+      /></label>
+    </div>
+    @for (bill of filteredBills; track bill.id || bill._id) {
+      <div class="list-row bill-row">
+        <span class="item-icon"><app-icon name="bills" /></span>
+        <div class="item-info">
+          <strong>{{ bill.name }}</strong
+          ><small>{{ schedule(bill) }}</small>
+        </div>
+        <b class="money">{{ bill.price | currency }}</b>
+        <div class="bill-actions">
+          <button
+            class="icon-button"
+            (click)="editBill(bill)"
+            [attr.aria-label]="'Edit ' + bill.name"
+            title="Edit"
+          >
+            <app-icon name="edit" /></button
+          ><button
+            class="icon-button danger"
+            (click)="delete(bill.id || bill._id)"
+            [attr.aria-label]="'Delete ' + bill.name"
+            title="Delete"
+          >
+            <app-icon name="trash" />
+          </button>
+        </div>
       </div>
-      <div class="field" style="display: flex; flex-direction: column;">
-        <label for="price" style="margin-bottom: 0.5rem;">Price</label>
-        <input id="price" type="number" pInputText [(ngModel)]="billForm.price" />
-      </div>
-      <div class="field" style="display: flex; flex-direction: column;">
-        <label for="frequency" style="margin-bottom: 0.5rem;">Frequency</label>
-        <select id="frequency" class="w-full p-2" style="background: #1e1e1e; color: #fff; border: 1px solid #333; border-radius: 6px; padding: 0.75rem;" [(ngModel)]="billForm.frequency">
+    } @empty {
+      <p class="empty-state">
+        {{ searchTerm ? 'No matching bills.' : 'No bills yet.' }}
+      </p>
+    }
+  </section>
+  <p-dialog
+    [(visible)]="billDialog"
+    [header]="dialogTitle"
+    [modal]="true"
+    [style]="{ width: '500px', maxWidth: 'calc(100vw - 32px)' }"
+  >
+    <form
+      #billFields="ngForm"
+      (ngSubmit)="billFields.valid && saveBill()"
+      class="form-grid bill-form"
+    >
+      <label class="field full-width"
+        >Name<input
+          name="name"
+          [(ngModel)]="billForm.name"
+          required
+          maxlength="100"
+          autofocus
+      /></label>
+      <label class="field"
+        >Amount ($)<input
+          name="price"
+          type="number"
+          [(ngModel)]="billForm.price"
+          min="0.01"
+          step="0.01"
+          required
+      /></label>
+      <label class="field"
+        >Frequency<select name="frequency" [(ngModel)]="billForm.frequency">
           <option value="monthly">Monthly</option>
           <option value="weekly">Weekly</option>
           <option value="yearly">Yearly</option>
-          <option value="one-time">One Time</option>
-        </select>
-      </div>
-
+          <option value="one-time">One time</option>
+        </select></label
+      >
       @if (billForm.frequency !== 'one-time') {
-        <div class="field" style="display: flex; flex-direction: column;">
-          <label for="interval" style="margin-bottom: 0.5rem;">Every {{billForm.interval || 1}} {{billForm.frequency === 'monthly' ? 'month(s)' : billForm.frequency === 'weekly' ? 'week(s)' : 'year(s)'}}</label>
-          <input id="interval" type="number" pInputText [(ngModel)]="billForm.interval" min="1" />
-        </div>
+        <label class="field"
+          >Every
+          {{
+            billForm.frequency === 'monthly'
+              ? '(months)'
+              : billForm.frequency === 'weekly'
+                ? '(weeks)'
+                : '(years)'
+          }}<input
+            name="interval"
+            type="number"
+            [(ngModel)]="billForm.interval"
+            min="1"
+            step="1"
+            required
+        /></label>
       }
-
-      @if (billForm.frequency === 'monthly') {
-        <div class="field" style="display: flex; flex-direction: column;">
-          <label for="dueDay" style="margin-bottom: 0.5rem;">Due Day (1-31)</label>
-          <input id="dueDay" type="number" pInputText [(ngModel)]="billForm.dueDay" min="1" max="31" />
-        </div>
+      @if (
+        billForm.frequency === 'monthly' || billForm.frequency === 'yearly'
+      ) {
+        <label class="field"
+          >Due day<input
+            name="dueDay"
+            type="number"
+            [(ngModel)]="billForm.dueDay"
+            min="1"
+            max="31"
+            step="1"
+            required
+        /></label>
       }
-
       @if (billForm.frequency === 'weekly') {
-        <div class="field" style="display: flex; flex-direction: column;">
-          <label for="dueDayOfWeek" style="margin-bottom: 0.5rem;">Day of Week</label>
-          <select id="dueDayOfWeek" class="w-full p-2" style="background: #1e1e1e; color: #fff; border: 1px solid #333; border-radius: 6px; padding: 0.75rem;" [(ngModel)]="billForm.dueDayOfWeek">
-            <option [value]="0">Sunday</option>
-            <option [value]="1">Monday</option>
-            <option [value]="2">Tuesday</option>
-            <option [value]="3">Wednesday</option>
-            <option [value]="4">Thursday</option>
-            <option [value]="5">Friday</option>
-            <option [value]="6">Saturday</option>
-          </select>
-        </div>
+        <label class="field"
+          >Due on<select
+            name="dueDayOfWeek"
+            [(ngModel)]="billForm.dueDayOfWeek"
+          >
+            @for (day of weekdays; track $index) {
+              <option [ngValue]="$index">{{ day }}</option>
+            }
+          </select></label
+        >
       }
-
       @if (billForm.frequency === 'yearly') {
-        <div class="field" style="display: flex; gap: 1rem;">
-          <div style="flex: 1; display: flex; flex-direction: column;">
-            <label for="dueMonth" style="margin-bottom: 0.5rem;">Month</label>
-            <select id="dueMonth" class="w-full p-2" style="background: #1e1e1e; color: #fff; border: 1px solid #333; border-radius: 6px; padding: 0.75rem;" [(ngModel)]="billForm.dueMonth">
-              <option [value]="1">January</option>
-              <option [value]="2">February</option>
-              <option [value]="3">March</option>
-              <option [value]="4">April</option>
-              <option [value]="5">May</option>
-              <option [value]="6">June</option>
-              <option [value]="7">July</option>
-              <option [value]="8">August</option>
-              <option [value]="9">September</option>
-              <option [value]="10">October</option>
-              <option [value]="11">November</option>
-              <option [value]="12">December</option>
-            </select>
-          </div>
-          <div style="flex: 1; display: flex; flex-direction: column;">
-            <label for="dueDay" style="margin-bottom: 0.5rem;">Day (1-31)</label>
-            <input id="dueDay" type="number" pInputText [(ngModel)]="billForm.dueDay" min="1" max="31" />
-          </div>
-        </div>
+        <label class="field"
+          >Month<select name="dueMonth" [(ngModel)]="billForm.dueMonth">
+            @for (month of months; track $index) {
+              <option [ngValue]="$index + 1">{{ month }}</option>
+            }
+          </select></label
+        >
       }
-    </div>
-    <ng-template pTemplate="footer">
-      <p-button label="Cancel" icon="bx bx-x" (onClick)="hideDialog()" styleClass="p-button-text" />
-      <p-button label="Save" icon="bx bx-check" (onClick)="saveBill()" severity="success" />
-    </ng-template>
+      <div class="button-row full-width form-actions">
+        <button class="secondary-button" type="button" (click)="hideDialog()">
+          Cancel</button
+        ><button
+          class="primary-button"
+          type="submit"
+          [disabled]="billFields.invalid || !billForm.name.trim()"
+        >
+          Save bill
+        </button>
+      </div>
+    </form>
   </p-dialog>
-</div>
+</main>

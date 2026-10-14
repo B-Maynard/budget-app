@@ -1,96 +1,99 @@
-<div class="dashboard-wrapper">
-  <div class="dashboard-container">
-    
-    <!-- Summary Card -->
-    <p-card styleClass="summary-card">
-      <div class="summary-grid totals-grid">
-        <div class="summary-item input-item">
-          <span class="label">Bailey Income</span>
-          <input id="baileyIncome" type="number" pInputText [(ngModel)]="baileyIncome" placeholder="0.00" />
-        </div>
-        <div class="summary-item input-item">
-          <span class="label">Imari Income</span>
-          <input id="imariIncome" type="number" pInputText [(ngModel)]="imariIncome" placeholder="0.00" />
-        </div>
-        <div class="summary-item input-item">
-          <span class="label">Extras</span>
-          <input id="extras" type="number" pInputText [(ngModel)]="extras" placeholder="0.00" />
-        </div>
-      </div>
-
-      <p-divider></p-divider>
-
-      <div class="summary-grid">
-        <div class="summary-item">
-          <span class="label">Bill Total</span>
-          <span class="value">{{ billTotal() | currency }}</span>
-        </div>
-        <div class="summary-item highlight-item">
-          <span class="label">Total Left After Bills</span>
-          <span class="value available-value" [class.positive]="((imariIncome + baileyIncome) - billTotal()) > 0" [class.negative]="((imariIncome + baileyIncome) - billTotal()) < 0">
-            {{ (imariIncome + baileyIncome) - billTotal() | currency }}
-          </span>
-        </div>
-      </div>
-    </p-card>
-
-    <!-- Main Two-Column Layout on Desktop -->
-    <div class="dashboard-layout">
-      
-      <!-- Left Column: Chosen Bills -->
-      <div class="layout-column">
-        <p-card header="Chosen Bills" styleClass="bills-card">
-          <div class="action-buttons mb-4">
-            <p-button (onClick)="removeAllChosenBills()" severity="danger" [outlined]="true" label="Remove All" icon="bx bx-x" class="flex-1" styleClass="w-full" />
-          </div>
-
-          <div class="bills-list">
-            @for (bill of chosenBills; track bill) {
-              <div class="bill-item slide-in selectable-bill chosen" (click)="chosenBillClick(bill)">
-                <div class="bill-content">
-                  <span class="bill-name-display">{{ bill?.name }}</span>
-                  <span class="bill-price-display">{{ bill?.price | currency }}</span>
-                </div>
-                <i class="bx bx-chevron-right text-xl text-red-400"></i>
-              </div>
-            }
-          </div>
-          @if (chosenBills.length === 0) {
-            <div class="empty-state">
-              <i class="bx bx-receipt"></i>
-              <p>No chosen bills.</p>
-            </div>
-          }
-        </p-card>
-      </div>
-
-      <!-- Right Column: Current Bills -->
-      <div class="layout-column">
-        <p-card header="Available Bills" styleClass="bills-card">
-          <div class="action-buttons mb-4">
-            <p-button (onClick)="addAllCurrentBills()" label="Add All" icon="bx bx-check-double" class="flex-1" styleClass="w-full" />
-          </div>
-
-          <div class="bills-list">
-            @for (bill of currentBills; track bill) {
-              <div class="bill-item slide-in selectable-bill" (click)="currentBillClick(bill)">
-                <i class="bx bx-chevron-left text-xl text-gray-400"></i>
-                <div class="bill-content">
-                  <span class="bill-name-display">{{ bill.name }}</span>
-                  <span class="bill-price-display">{{ bill.price | currency }}</span>
-                </div>
-              </div>
-            }
-          </div>
-          @if (!currentBills || currentBills.length === 0) {
-            <div class="empty-state">
-              <i class="bx bx-check-circle"></i>
-              <p>No available bills.</p>
-            </div>
-          }
-        </p-card>
-      </div>
-
+<main class="page">
+  <div class="page-heading"><h1>Bill totals</h1></div>
+  <section class="totals-summary surface">
+    <div class="income-inputs">
+      <label class="field"
+        >Bailey income ($)<input
+          id="baileyIncome"
+          type="number"
+          min="0"
+          step="0.01"
+          [(ngModel)]="baileyIncome" /></label
+      ><label class="field"
+        >Imari income ($)<input
+          id="imariIncome"
+          type="number"
+          min="0"
+          step="0.01"
+          [(ngModel)]="imariIncome" /></label
+      ><label class="field"
+        >Extras ($)<input
+          id="extras"
+          type="number"
+          min="0"
+          step="0.01"
+          [(ngModel)]="extras"
+      /></label>
     </div>
+    <div class="totals-balance">
+      <span>After selected bills</span
+      ><strong
+        class="available-value"
+        [class.negative]="imariIncome + baileyIncome - billTotal() < 0"
+        >{{ imariIncome + baileyIncome - billTotal() | currency }}</strong
+      >
+      <div>
+        <span>Selected total</span
+        ><b class="money">{{ billTotal() | currency }}</b>
+      </div>
+    </div>
+  </section>
+  <div class="two-columns totals-lists">
+    <section class="surface">
+      <div class="section-heading">
+        <h2>
+          Selected <span class="pill">{{ chosenBills.length }}</span>
+        </h2>
+        <button
+          class="text-button"
+          (click)="removeAllChosenBills()"
+          [disabled]="!chosenBills.length"
+        >
+          Remove all
+        </button>
+      </div>
+      @for (bill of chosenBills; track bill.id || bill._id) {
+        <button
+          class="selection-row selected"
+          (click)="chosenBillClick(bill)"
+          [attr.aria-label]="'Remove ' + bill.name + ' from totals'"
+        >
+          <span class="item-icon"><app-icon name="check" /></span
+          ><strong>{{ bill.name }}</strong
+          ><b class="money">{{ bill.price | currency }}</b
+          ><app-icon name="close" />
+        </button>
+      } @empty {
+        <p class="empty-state">Select bills to calculate a total.</p>
+      }
+    </section>
+    <section class="surface">
+      <div class="section-heading">
+        <h2>
+          Available <span class="pill">{{ currentBills.length || 0 }}</span>
+        </h2>
+        <button
+          class="text-button"
+          (click)="addAllCurrentBills()"
+          [disabled]="!currentBills.length"
+        >
+          Add all
+        </button>
+      </div>
+      @for (bill of currentBills; track bill.id || bill._id) {
+        <button
+          class="selection-row"
+          (click)="currentBillClick(bill)"
+          [attr.aria-label]="'Add ' + bill.name + ' to totals'"
+        >
+          <span class="item-icon"><app-icon name="bills" /></span
+          ><strong>{{ bill.name }}</strong
+          ><b class="money">{{ bill.price | currency }}</b
+          ><app-icon name="plus" />
+        </button>
+      } @empty {
+        <p class="empty-state">No more bills to select.</p>
+      }
+    </section>
   </div>
-</div>
+</main>

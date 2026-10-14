@@ -1,69 +1,119 @@
+:host {
+  display: block;
+}
 .app-container {
+  min-height: 100dvh;
+  background: var(--app-bg);
+}
+.app-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+.header-content {
+  max-width: 1280px;
+  margin: auto;
+  padding: 0 48px;
+  height: 80px;
   display: flex;
-  flex-direction: column;
-  height: 100vh;
-  background-color: #121212;
-}
-
-.main-content {
-  flex: 1;
-  overflow-y: auto;
-}
-
-.bottom-spacer {
-  height: calc(80px + env(safe-area-inset-bottom));
-}
-
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 60px;
-  background-color: #1e1e1e;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  display: flex;
-  justify-content: space-around;
   align-items: center;
-  z-index: 1000;
-  padding-bottom: env(safe-area-inset-bottom);
+  justify-content: space-between;
+  gap: 24px;
 }
-
-.nav-item {
+.app-brand {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  color: #888;
+  gap: 9px;
+  color: var(--accent);
+  font-size: 25px;
+  font-weight: 650;
+  letter-spacing: -0.9px;
   text-decoration: none;
-  font-size: 0.75rem;
-  transition: color 0.2s ease;
-  flex: 1;
-  height: 100%;
 }
-
-.nav-item i {
-  font-size: 1.5rem;
-  margin-bottom: 2px;
+.app-brand span {
+  margin-left: -8px;
 }
-
-.nav-item.active {
-  color: #4ade80; /* Primary/Success color used in app */
+.app-brand app-icon {
+  height: 25px;
+  width: 25px;
 }
-
-.nav-item:hover {
-  color: #fff;
+.app-nav {
+  display: flex;
+  gap: 6px;
 }
-
-/* For larger screens, maybe we don't want it stuck to the bottom, 
-   but since mobile is the focus, this is fine. 
-   We can add a max-width wrapper if needed. */
-@media (min-width: 800px) {
-  .bottom-nav {
-    max-width: 800px;
-    margin: 0 auto;
-    border-radius: 12px 12px 0 0;
-    border-left: 1px solid rgba(255, 255, 255, 0.1);
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
+.app-nav a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 14px;
+  color: var(--muted);
+  border-radius: 7px;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+}
+.app-nav a.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.app-nav a:hover {
+  color: var(--accent);
+}
+.app-nav app-icon {
+  width: 17px;
+  height: 17px;
+}
+.theme-toggle {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  height: 42px;
+  width: 42px;
+  padding: 0;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  border-radius: 10px;
+}
+.theme-toggle:hover {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+.mockup-mode {
+  background: transparent;
+}
+@media (max-width: 760px) {
+  .header-content {
+    height: 70px;
+    padding: 0 20px;
+  }
+  .app-brand {
+    font-size: 24px;
+  }
+  .app-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    padding: 9px 8px calc(9px + env(safe-area-inset-bottom));
+    background: var(--surface);
+    border-top: 1px solid var(--line);
+    gap: 4px;
+  }
+  .app-nav a {
+    flex: 1;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+    padding: 8px 2px;
+    font-size: 10px;
+    border-radius: 8px;
+  }
+  .app-nav app-icon {
+    width: 21px;
+    height: 21px;
+  }
+  .main-content.has-nav {
+    padding-bottom: calc(88px + env(safe-area-inset-bottom));
   }
 }
