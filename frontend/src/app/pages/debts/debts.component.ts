@@ -43,7 +43,7 @@ export class DebtsComponent implements OnInit {
   allMonths = 18;
   plans: Record<number, Plan> = {};
   results: Record<number, Result | null> = {};
-  excluded = new Set<number>();
+  selected = new Set<number>();
   income = 0;
   incomeNote = 'Loading…';
   bills: any[] = [];
@@ -267,21 +267,20 @@ export class DebtsComponent implements OnInit {
     }
   }
   toggle(d: Debt) {
-    this.excluded.has(d.id)
-      ? this.excluded.delete(d.id)
-      : this.excluded.add(d.id);
+    this.selected.has(d.id)
+      ? this.selected.delete(d.id)
+      : this.selected.add(d.id);
     this.recalc();
   }
   toggleAll() {
-    this.excluded = this.excluded.size
-      ? new Set()
-      : new Set(this.active.map((d) => d.id));
+    this.selected =
+      this.included.length === this.active.length
+        ? new Set()
+        : new Set(this.active.map((d) => d.id));
     this.recalc();
   }
   planOnly(d: Debt) {
-    this.excluded = new Set(
-      this.active.filter((x) => x.id !== d.id).map((x) => x.id),
-    );
+    this.selected = new Set([d.id]);
     this.recalc();
     document.getElementById('planner')?.scrollIntoView({ behavior: 'smooth' });
   }
@@ -310,7 +309,7 @@ export class DebtsComponent implements OnInit {
     return this.debts.filter((d) => d.currentBalanceCents > 0);
   }
   get included() {
-    return this.active.filter((d) => !this.excluded.has(d.id));
+    return this.active.filter((d) => this.selected.has(d.id));
   }
   /** What every active debt costs per month right now, plus debt bills that aren't linked to a debt yet. */
   get debtPaymentsCents() {

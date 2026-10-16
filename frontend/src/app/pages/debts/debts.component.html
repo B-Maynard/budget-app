@@ -72,7 +72,7 @@
         <label
           ><input
             type="checkbox"
-            [checked]="!excluded.size"
+            [checked]="included.length === active.length"
             (change)="toggleAll()"
           />
           Select all</label
@@ -80,12 +80,12 @@
       </div>
       <div class="debt-plans">
         @for (d of active; track d.id) {
-          <section class="debt-plan" [class.off]="excluded.has(d.id)">
+          <section class="debt-plan" [class.off]="!selected.has(d.id)">
             <div class="debt-plan-heading">
               <label
                 ><input
                   type="checkbox"
-                  [checked]="!excluded.has(d.id)"
+                  [checked]="selected.has(d.id)"
                   (change)="toggle(d)"
                   [attr.aria-label]="'Include ' + d.name"
                 /><strong>{{ d.name }}</strong></label
@@ -137,7 +137,7 @@
             } @else {
               <p class="plan-empty">
                 {{
-                  excluded.has(d.id)
+                  !selected.has(d.id)
                     ? 'Not in plan'
                     : 'Choose at least one month or a date on/after ' +
                       firstDate(d) +
