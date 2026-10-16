@@ -1,13 +1,21 @@
 <main class="page">
   <div class="page-heading">
     <h1>Activity</h1>
-    <button
-      class="secondary-button"
-      (click)="importSection.open = !importSection.open"
-    >
-      <app-icon name="upload" /> Import CSV
-    </button>
+    <div class="heading-actions">
+      <button class="secondary-button" (click)="aiCategorize()">
+        {{ aiRunning ? 'Stop' : 'AI Categorization' }}
+      </button>
+      <button
+        class="secondary-button"
+        (click)="importSection.open = !importSection.open"
+      >
+        <app-icon name="upload" /> Import CSV
+      </button>
+    </div>
   </div>
+  @if (aiProgress) {
+    <p class="import-status" role="status">{{ aiProgress }}</p>
+  }
   <details #importSection class="details-panel import-panel">
     <summary>Import transactions</summary>
     <div class="details-content">

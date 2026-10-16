@@ -29,6 +29,8 @@ services:
       HERMES_URL: ${HERMES_URL:-}
       HERMES_MODEL: ${HERMES_MODEL:-}
       HERMES_API_KEY: ${HERMES_API_KEY:-}
+      TYPESAFE_API_KEY: ${TYPESAFE_API_KEY:-}
+      TYPESAFE_MODEL: ${TYPESAFE_MODEL:-jev-1.13.0}
     depends_on:
       db:
         condition: service_healthy

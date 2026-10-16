@@ -17,5 +17,7 @@ export class BankingController {
   @Get('category-limits') limits(@Headers() h: any) { this.auth.determineNotAuth(h); return this.banking.getCategoryLimits(); }
   @Post('category-limits') setLimit(@Headers() h: any, @Body() dto: SetCategoryLimitDto) { this.auth.determineNotAuth(h); return this.banking.setCategoryLimit(dto); }
   @Delete('category-limits/:category') deleteLimit(@Headers() h: any, @Param('category') category: string) { this.auth.determineNotAuth(h); return this.banking.deleteCategoryLimit(category); }
+  @Get('transactions/ai-pending') aiPending(@Headers() h: any) { this.auth.determineNotAuth(h); return this.categorization.jevPendingIds(); }
+  @Post('transactions/:id/ai-category') aiCategory(@Headers() h: any, @Param('id') id: string) { this.auth.determineNotAuth(h); return this.categorization.jevCategorize(Number(id)); }
   @Patch('transactions/:id/category') category(@Headers() h: any, @Param('id') id: string, @Body() dto: UpdateTransactionCategoryDto) { this.auth.determineNotAuth(h); return this.categorization.updateTransactionCategory(Number(id), dto.category); }
 }

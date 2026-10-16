@@ -8,7 +8,7 @@ import {
   DashboardQuery,
 } from '../../services/transactions.service';
 import { MoneyPipe } from '../../pipes/money.pipe';
-import { finalize, interval, startWith, switchMap, takeWhile } from 'rxjs';
+import { finalize, firstValueFrom, interval, startWith, switchMap, takeWhile } from 'rxjs';
 
 @Component({
   selector: 'app-transactions',
@@ -54,6 +54,9 @@ export class TransactionsComponent implements OnInit {
   error = '';
   importMessage = '';
   importStatus = '';
+  aiProgress = '';
+  aiRunning = false;
+  private aiStop = false;
   limitCategory = '';
   limit = 0;
   constructor(private service: TransactionsService) {}
@@ -127,6 +130,36 @@ export class TransactionsComponent implements OnInit {
     this.service
       .updateTransactionCategory(transaction.id, transaction.category)
       .subscribe({ error: () => (this.error = 'Could not update category.') });
+  }
+  /** Walks every entry Jev may change, one at a time, updating the table as it goes. */
+  async aiCategorize() {
+    if (this.aiRunning) return void (this.aiStop = true);
+    this.aiRunning = true;
+    this.aiStop = false;
+    this.error = '';
+    let done = 0;
+    let changed = 0;
+    let unsure = 0;
+    try {
+      const ids = await firstValueFrom(this.service.getAiPendingIds());
+      for (const id of ids) {
+        if (this.aiStop) break;
+        this.aiProgress = `Jev is categorizing ${done + 1} of ${ids.length}…`;
+        const r = await firstValueFrom(this.service.aiCategorize(id));
+        done++;
+        if (r.changed) changed++;
+        if (r.lowConfidence) unsure++;
+        const row = this.result.transactions.find((t) => t.id === id);
+        if (row) row.category = r.category;
+      }
+      this.aiProgress = `${this.aiStop ? 'Stopped' : 'Done'}: ${changed} of ${done} entries re-categorized${unsure ? `, ${unsure} left for you (Jev wasn't confident)` : ''}.`;
+    } catch (e: any) {
+      this.aiProgress = '';
+      this.error = e?.error?.message || 'AI categorization failed.';
+    } finally {
+      this.aiRunning = false;
+      this.load();
+    }
   }
   saveLimit() {
     if (!this.limitCategory || this.limit < 1) return;

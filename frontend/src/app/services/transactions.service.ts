@@ -27,6 +27,8 @@ export class TransactionsService {
   }
   getImportStatus(id: number) { return this.http.get<ImportStatus>(this.url(`/import-status/${id}`), { headers: this.headers() }); }
   updateTransactionCategory(id: number, category: string): Observable<void> { return this.http.patch<void>(this.url(`/transactions/${id}/category`), { category }, { headers: this.headers() }); }
+  getAiPendingIds(): Observable<number[]> { return this.http.get<number[]>(this.url('/transactions/ai-pending'), { headers: this.headers() }); }
+  aiCategorize(id: number): Observable<{ category: string; changed: boolean; lowConfidence?: boolean }> { return this.http.post<{ category: string; changed: boolean; lowConfidence?: boolean }>(this.url(`/transactions/${id}/ai-category`), {}, { headers: this.headers() }); }
   getCategoryLimits(): Observable<Record<string, number>> {
     return this.http.get<any[]>(this.url('/category-limits'), { headers: this.headers() }).pipe(map(rows => Object.fromEntries(rows.map(row => [row.category, row.limitCents]))));
   }
