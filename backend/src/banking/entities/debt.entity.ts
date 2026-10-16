@@ -14,6 +14,8 @@ export class Debt {
   @Column('integer', { name: 'current_balance_cents' }) currentBalanceCents: number;
   @Column('integer', { name: 'payment_amount_cents' }) paymentAmountCents: number;
   @Column('integer', { name: 'payment_day' }) paymentDay: number;
+  // Bill tagged 'debt' this debt is paid through. Unique: one debt per bill.
+  @Column({ name: 'bill_id', type: 'varchar', nullable: true, unique: true }) billId: string | null;
   @Column('date', { name: 'last_applied_month' }) lastAppliedMonth: string;
   @Column('timestamptz', { name: 'created_at' }) createdAt: Date;
   @Column('timestamptz', { name: 'updated_at' }) updatedAt: Date;

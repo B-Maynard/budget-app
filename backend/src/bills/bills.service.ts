@@ -1,16 +1,20 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateBillDto } from './dto/create-bill.dto';
 import { UpdateBillDto } from './dto/update-bill.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Bill } from './entities/bill.entity';
 import { Repository } from 'typeorm';
+import { Debt } from '../banking/entities/debt.entity';
+import { billMonthlyCents } from './bill-cost';
 
 @Injectable()
 export class BillsService {
 
   constructor(
     @InjectRepository(Bill)
-    private billRepository: Repository<Bill>
+    private billRepository: Repository<Bill>,
+    @InjectRepository(Debt)
+    private debtRepository: Repository<Debt>
   ) {}
 
   async create(createBillDto: CreateBillDto) {
@@ -33,6 +37,11 @@ export class BillsService {
 
   async update(id: string, updateBillDto: UpdateBillDto) {
     const bill = await this.findOne(id);
+    const merged = { ...bill, ...updateBillDto } as Bill;
+    // A linked bill has to stay a recurring Debt bill; its debt depends on that.
+    if ((merged.tag !== 'debt' || billMonthlyCents(merged) < 1) && (await this.debtRepository.findOneBy({ billId: id }))) {
+      throw new ConflictException('This bill is linked to a debt. Unlink it on the debts page first.');
+    }
     const updatedBill = Object.assign(bill, updateBillDto);
     return this.billRepository.save(updatedBill);
   }

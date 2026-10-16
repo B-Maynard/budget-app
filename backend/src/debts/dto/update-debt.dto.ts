@@ -30,4 +30,8 @@ export class UpdateDebtDto {
   @Max(28)
   @IsOptional()
   paymentDay?: number;
+
+  @IsOptional()
+  @IsString()
+  billId?: string | null;
 }

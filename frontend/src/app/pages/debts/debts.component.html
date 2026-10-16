@@ -185,7 +185,7 @@
   <section class="surface table-panel debt-list">
     <div class="section-heading">
       <h2>Your debts</h2>
-      <span class="pill">{{ debts.length }}</span>
+      <span class="pill">{{ debts.length + unlinkedDebtBills.length }}</span>
     </div>
     <div class="table-scroll">
       <table>
@@ -205,6 +205,9 @@
             <tr>
               <td>
                 <strong>{{ d.name }}</strong>
+                @if (billName(d.billId)) {
+                  <small class="linked-bill">Bill: {{ billName(d.billId) }}</small>
+                }
               </td>
               <td>{{ d.aprBps / 100 | number: '1.2-2' }}%</td>
               <td class="number">{{ d.startingBalanceCents | money }}</td>
@@ -224,6 +227,15 @@
               <td>{{ d.paymentDay }}</td>
               <td>
                 <div class="table-actions">
+                  @if (d.billId) {
+                    <button
+                      class="text-button"
+                      (click)="unlink(d)"
+                      [attr.aria-label]="'Unlink bill from ' + d.name"
+                    >
+                      Unlink
+                    </button>
+                  }
                   @if (d.currentBalanceCents > 0) {
                     <button
                       class="text-button"
@@ -253,7 +265,36 @@
                 </div>
               </td>
             </tr>
-          } @empty {
+          }
+          @for (b of unlinkedDebtBills; track b.id) {
+            <tr>
+              <td>
+                <strong>{{ b.name }}</strong>
+                <small class="linked-bill">From bills</small>
+              </td>
+              <td>—</td>
+              <td class="number">—</td>
+              <td>—</td>
+              <td class="number">{{ billMonthlyCents(b) | money }}</td>
+              <td>{{ b.dueDay || '—' }}</td>
+              <td>
+                <div class="table-actions">
+                  <button
+                    class="text-button"
+                    (click)="
+                      addFromBill(b);
+                      debtForm.open = true;
+                      debtForm.scrollIntoView({ behavior: 'smooth' })
+                    "
+                    [attr.aria-label]="'Add details for ' + b.name"
+                  >
+                    Add details
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+          @if (!debts.length && !unlinkedDebtBills.length) {
             <tr>
               <td colspan="7" class="empty-state">No debts yet.</td>
             </tr>
@@ -299,6 +340,7 @@
             min="0.01"
             step="0.01"
             [(ngModel)]="form.payment"
+            [disabled]="!!form.billId"
             name="payment" /></label
         ><label class="field"
           >Payment day<input
@@ -310,6 +352,19 @@
             [(ngModel)]="form.day"
             name="day"
         /></label>
+        <label class="field full-width"
+          >Linked bill (sets the monthly payment)<select
+            name="billId"
+            [(ngModel)]="form.billId"
+            [disabled]="!!form.billId"
+            (ngModelChange)="onBillPicked($event)"
+          >
+            <option value="">None</option>
+            @for (b of linkableBills; track b.id) {
+              <option [value]="b.id">{{ b.name }}</option>
+            }
+          </select></label
+        >
         <div class="button-row full-width">
           <button
             class="primary-button"

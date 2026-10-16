@@ -38,7 +38,7 @@ export class DebtsComponent implements OnInit {
   loading = false;
   error = '';
   editing: number | null = null;
-  form = { name: '', apr: 0, starting: 0, payment: 0, day: 1 };
+  form = { name: '', apr: 0, starting: 0, payment: 0, day: 1, billId: '' };
   today = todayIso();
   allMonths = 18;
   plans: Record<number, Plan> = {};
@@ -94,6 +94,9 @@ export class DebtsComponent implements OnInit {
         (this.incomeNote =
           'Could not load transactions. Enter your monthly income.'),
     });
+    this.loadBills();
+  }
+  loadBills() {
     this.billsService
       .getBills(localStorage.getItem(sessionConfig.dbAccessToken) || '')
       .subscribe({
@@ -108,6 +111,7 @@ export class DebtsComponent implements OnInit {
       startingBalanceCents: Math.round(this.form.starting * 100),
       paymentAmountCents: Math.round(this.form.payment * 100),
       paymentDay: this.form.day,
+      billId: this.form.billId || null,
     };
     const request =
       this.editing === null
@@ -118,6 +122,7 @@ export class DebtsComponent implements OnInit {
         if (this.editing !== null) delete this.plans[this.editing];
         this.cancel();
         this.load();
+        this.loadBills();
       },
       error: () => (this.error = 'Could not save debt.'),
     });
@@ -130,11 +135,65 @@ export class DebtsComponent implements OnInit {
       starting: debt.startingBalanceCents / 100,
       payment: debt.paymentAmountCents / 100,
       day: debt.paymentDay,
+      billId: debt.billId || '',
     };
   }
   cancel() {
     this.editing = null;
-    this.form = { name: '', apr: 0, starting: 0, payment: 0, day: 1 };
+    this.form = { name: '', apr: 0, starting: 0, payment: 0, day: 1, billId: '' };
+  }
+  /** Debt-tagged bills that no debt is linked to yet. They show in the list until a debt is added for them. */
+  get unlinkedDebtBills() {
+    return this.bills.filter(
+      (b) => b.tag === 'debt' && !this.debts.some((d) => d.billId === b.id),
+    );
+  }
+  /** Bills the debt form can link to: debt-tagged, and not taken by a different debt. */
+  get linkableBills() {
+    return this.bills.filter(
+      (b) =>
+        b.tag === 'debt' &&
+        !this.debts.some((d) => d.billId === b.id && d.id !== this.editing),
+    );
+  }
+  billMonthlyCents(b: any) {
+    return Math.round(billMonthly(b) * 100);
+  }
+  billName(id: string | null) {
+    return this.bills.find((b) => b.id === id)?.name;
+  }
+  /** Picking a bill sets the payment to that bill's monthly cost. */
+  onBillPicked(id: string) {
+    const b = this.bills.find((x) => x.id === id);
+    if (b) this.form.payment = this.billMonthlyCents(b) / 100;
+  }
+  /** Unlink a debt from its bill. The bill is deleted and the debt keeps its monthly payment. */
+  unlink(d: Debt) {
+    if (
+      !confirm(
+        `Unlink ${d.name}? Its linked bill will be deleted, and ${d.name} keeps its monthly payment.`,
+      )
+    )
+      return;
+    this.service.updateDebt(d.id, { billId: null }).subscribe({
+      next: () => {
+        this.load();
+        this.loadBills();
+      },
+      error: () => (this.error = 'Could not unlink bill.'),
+    });
+  }
+  /** Start a debt for an existing bill: name, monthly cost and due day come from the bill. */
+  addFromBill(b: any) {
+    this.cancel();
+    this.form = {
+      name: b.name,
+      apr: 0,
+      starting: 0,
+      payment: this.billMonthlyCents(b) / 100,
+      day: Math.min(28, b.dueDay || 1),
+      billId: b.id,
+    };
   }
   remove(debt: Debt) {
     if (!confirm(`Delete ${debt.name}?`)) return;
@@ -239,7 +298,10 @@ export class DebtsComponent implements OnInit {
         }),
       );
     forkJoin(calls).subscribe({
-      next: () => this.load(),
+      next: () => {
+        this.load();
+        this.loadBills();
+      },
       error: () => (this.error = 'Could not apply plan.'),
     });
   }
@@ -250,9 +312,12 @@ export class DebtsComponent implements OnInit {
   get included() {
     return this.active.filter((d) => !this.excluded.has(d.id));
   }
-  /** What every active debt costs per month right now. */
+  /** What every active debt costs per month right now, plus debt bills that aren't linked to a debt yet. */
   get debtPaymentsCents() {
-    return this.active.reduce((s, d) => s + d.paymentAmountCents, 0);
+    return (
+      this.active.reduce((s, d) => s + d.paymentAmountCents, 0) +
+      this.unlinkedDebtBills.reduce((s, b) => s + this.billMonthlyCents(b), 0)
+    );
   }
   /** Tagged debts: how much their planned payment differs from what they cost now. Negative when the plan needs less. */
   get planChangeCents() {

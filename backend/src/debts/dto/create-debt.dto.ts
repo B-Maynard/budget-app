@@ -1,4 +1,4 @@
-import { IsInt, IsNotEmpty, IsNumber, IsString, Max, Min } from 'class-validator';
+import { IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
 
 export class CreateDebtDto {
   @IsString()
@@ -21,4 +21,8 @@ export class CreateDebtDto {
   @Min(1)
   @Max(28)
   paymentDay: number;
+
+  @IsOptional()
+  @IsString()
+  billId?: string | null;
 }

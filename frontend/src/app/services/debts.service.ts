@@ -3,8 +3,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { apiConfig } from '../configs/apis.config';
 import { sessionConfig } from '../configs/session.config';
 
-export interface Debt { id: number; name: string; aprBps: number; startingBalanceCents: number; currentBalanceCents: number; paymentAmountCents: number; paymentDay: number; }
-export interface CreateDebtDto { name: string; aprBps: number; startingBalanceCents: number; paymentAmountCents: number; paymentDay: number; }
+export interface Debt { id: number; name: string; aprBps: number; startingBalanceCents: number; currentBalanceCents: number; paymentAmountCents: number; paymentDay: number; billId: string | null; }
+export interface CreateDebtDto { name: string; aprBps: number; startingBalanceCents: number; paymentAmountCents: number; paymentDay: number; billId?: string | null; }
 export interface UpdateDebtDto extends Partial<CreateDebtDto> { currentBalanceCents?: number; }
 
 @Injectable({ providedIn: 'root' })
