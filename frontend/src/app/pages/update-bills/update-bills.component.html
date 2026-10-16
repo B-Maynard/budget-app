@@ -21,7 +21,7 @@
         <span class="item-icon"><app-icon name="bills" /></span>
         <div class="item-info">
           <strong>{{ bill.name }}</strong
-          ><small>{{ schedule(bill) }}</small>
+          ><small>{{ schedule(bill) }}{{ bill.tag === 'debt' ? ' · Debt' : '' }}</small>
         </div>
         <b class="money">{{ bill.price | currency }}</b>
         <div class="bill-actions">
@@ -76,6 +76,12 @@
           step="0.01"
           required
       /></label>
+      <label class="field"
+        >Tag<select name="tag" [(ngModel)]="billForm.tag">
+          <option value="bill">Bill</option>
+          <option value="debt">Debt</option>
+        </select></label
+      >
       <label class="field"
         >Frequency<select name="frequency" [(ngModel)]="billForm.frequency">
           <option value="monthly">Monthly</option>

@@ -36,4 +36,8 @@ export class Bill {
 
   @Column('simple-array', { nullable: true })
   paidDates: string[];
+
+  // 'bill' counts toward the debts page bills total; 'debt' is excluded there (debts are listed separately).
+  @Column({ default: 'bill' })
+  tag: string;
 }

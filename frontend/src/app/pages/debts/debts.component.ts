@@ -250,11 +250,16 @@ export class DebtsComponent implements OnInit {
   get included() {
     return this.active.filter((d) => !this.excluded.has(d.id));
   }
-  /** Payments on debts left out of the plan still come out of the budget. */
-  get otherPaymentsCents() {
-    return this.active
-      .filter((d) => this.excluded.has(d.id))
-      .reduce((s, d) => s + d.paymentAmountCents, 0);
+  /** What every active debt costs per month right now. */
+  get debtPaymentsCents() {
+    return this.active.reduce((s, d) => s + d.paymentAmountCents, 0);
+  }
+  /** Tagged debts: how much their planned payment differs from what they cost now. Negative when the plan needs less. */
+  get planChangeCents() {
+    return this.included.reduce(
+      (s, d) => s + (this.results[d.id] ? this.results[d.id]!.payment - d.paymentAmountCents : 0),
+      0,
+    );
   }
   get planned() {
     return Object.values(this.results).filter((r): r is Result => !!r);
@@ -273,22 +278,21 @@ export class DebtsComponent implements OnInit {
         .pop() || ''
     );
   }
-  /** Monthly bills, minus any bill named like a debt (that payment is already part of the plan). */
+  /** Monthly cost of bills tagged 'bill'. Debt-tagged bills are left out; debts are counted from the debt list. */
   get billsCents() {
-    const debtNames = new Set(
-      this.debts.map((d) => d.name.trim().toLowerCase()),
-    );
     return Math.round(
       this.bills
-        .filter((b) => !debtNames.has(String(b.name).trim().toLowerCase()))
+        .filter((b) => b.tag === 'bill')
         .reduce((s, b) => s + billMonthly(b), 0) * 100,
     );
   }
-  get availableCents() {
+  /** Average income - bills - debt payments, adjusted by the plan. */
+  get extraCents() {
     return (
       Math.round((this.income || 0) * 100) -
       this.billsCents -
-      this.otherPaymentsCents
+      this.debtPaymentsCents -
+      this.planChangeCents
     );
   }
   get totalBalance() {

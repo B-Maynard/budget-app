@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { IsIn, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class CreateBillDto {
     @IsString()
@@ -25,4 +25,8 @@ export class CreateBillDto {
     dueDayOfWeek?: number;
 
     paidDates?: string[];
+
+    @IsOptional()
+    @IsIn(['bill', 'debt'])
+    tag?: string;
 }

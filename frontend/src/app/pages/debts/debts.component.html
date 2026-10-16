@@ -44,7 +44,7 @@
       </div>
       <div class="budget">
         <label class="field" [title]="incomeNote"
-          >Monthly income ($)<input
+          >Avg. monthly income ($)<input
             type="number"
             min="0"
             step="0.01"
@@ -54,15 +54,18 @@
         <div class="budget-stat">
           <span>Bills / month</span><b>{{ billsCents | money }}</b>
         </div>
-        @if (otherPaymentsCents) {
+        <div class="budget-stat">
+          <span>Debt payments now</span><b>{{ debtPaymentsCents | money }}</b>
+        </div>
+        @if (planChangeCents) {
           <div class="budget-stat">
-            <span>Other debt payments</span
-            ><b>{{ otherPaymentsCents | money }}</b>
+            <span>Plan change</span
+            ><b [class.bad]="planChangeCents > 0">{{ -planChangeCents | money }}</b>
           </div>
         }
         <div class="budget-stat budget-available">
-          <span>Available for debt</span
-          ><b [class.bad]="availableCents < 0">{{ availableCents | money }}</b>
+          <span>Extra spend</span
+          ><b [class.bad]="extraCents < 0">{{ extraCents | money }}</b>
         </div>
       </div>
       <div class="plan-select">
@@ -149,7 +152,7 @@
         <p class="empty-state">No debts selected.</p>
       }
       @if (planned.length) {
-        <div class="verdict" [class.over-budget]="availableCents < neededCents">
+        <div class="verdict" [class.over-budget]="extraCents < 0">
           <div class="plan-summary">
             <div>
               <span>Peak monthly payment</span
@@ -165,10 +168,10 @@
           </div>
           <div class="verdict-actions">
             <p>
-              @if (availableCents >= neededCents) {
-                {{ availableCents - neededCents | money }} / month left over.
+              @if (extraCents >= 0) {
+                {{ extraCents | money }} / month left over.
               } @else {
-                {{ neededCents - availableCents | money }} / month over budget.
+                {{ -extraCents | money }} / month over budget.
               }
             </p>
             <button type="button" class="primary-button" (click)="applyPlan()">
