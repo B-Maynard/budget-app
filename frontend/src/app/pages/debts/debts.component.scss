@@ -181,6 +181,13 @@
 .bad {
   color: var(--danger);
 }
+.linked-bill {
+  display: block;
+  margin-top: 3px;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--muted);
+}
 .debt-list,
 .debt-form-panel {
   margin-top: 26px;
