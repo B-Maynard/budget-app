@@ -36,6 +36,10 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() {
+    // OAuth redirects cannot contain a hash route. Resume Link on Activity.
+    if (new URLSearchParams(location.search).has('oauth_state_id')) {
+      void this.router.navigate(['/transactions']);
+    }
     this.authService.isAuthenticated$.subscribe((status) => {
       this.isAuthenticated = status;
     });

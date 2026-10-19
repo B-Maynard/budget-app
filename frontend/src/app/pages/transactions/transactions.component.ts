@@ -1,4 +1,5 @@
 import { IconComponent } from '../../components/icon.component';
+import { BankConnectionsComponent } from '../../components/bank-connections.component';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -8,12 +9,25 @@ import {
   DashboardQuery,
 } from '../../services/transactions.service';
 import { MoneyPipe } from '../../pipes/money.pipe';
-import { finalize, firstValueFrom, interval, startWith, switchMap, takeWhile } from 'rxjs';
+import {
+  finalize,
+  firstValueFrom,
+  interval,
+  startWith,
+  switchMap,
+  takeWhile,
+} from 'rxjs';
 
 @Component({
   selector: 'app-transactions',
   standalone: true,
-  imports: [IconComponent, CommonModule, FormsModule, MoneyPipe],
+  imports: [
+    IconComponent,
+    BankConnectionsComponent,
+    CommonModule,
+    FormsModule,
+    MoneyPipe,
+  ],
   templateUrl: './transactions.component.html',
   styleUrl: './transactions.component.scss',
 })
@@ -63,19 +77,24 @@ export class TransactionsComponent implements OnInit {
   ngOnInit() {
     this.load();
   }
-  load() {
-    this.loading = true;
-    this.error = '';
+  load(silent = false) {
+    if (!silent) {
+      this.loading = true;
+      this.error = '';
+    }
     this.service
-      .getDashboard(this.query())
+      .getDashboard(this.query(), silent)
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
         next: (value) => (this.result = value),
         error: () => (this.error = 'Could not load transactions.'),
       });
-    this.service
-      .getCategoryLimits()
-      .subscribe({ next: (value) => (this.result.categoryLimits = value) });
+  }
+  accountName(importId: number): string {
+    const account = this.result.imports.find((i) => i.id === importId);
+    return account
+      ? `${account.accountLabel || 'Bank account'}${account.accountNumber ? ' ••' + account.accountNumber : ''}`
+      : 'Connected bank';
   }
   spendingWidth(amount: number) {
     return (
@@ -177,11 +196,9 @@ export class TransactionsComponent implements OnInit {
       });
   }
   removeLimit(category: string) {
-    this.service
-      .deleteCategoryLimit(category)
-      .subscribe({
-        next: () => delete this.result.categoryLimits[category],
-        error: () => (this.error = 'Could not delete limit.'),
-      });
+    this.service.deleteCategoryLimit(category).subscribe({
+      next: () => delete this.result.categoryLimits[category],
+      error: () => (this.error = 'Could not delete limit.'),
+    });
   }
 }

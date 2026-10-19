@@ -7,6 +7,7 @@ import { BankTransaction } from './entities/bank-transaction.entity';
 import { CategoryRule } from './entities/category-rule.entity';
 import { BANKING_CATEGORIES } from './banking.constants';
 import { normalizeDescription } from './imports.service';
+import { currentTransactions } from './current-transactions';
 
 const keywordMap: [string[], string][] = [
   [['payroll', 'salary', 'deposit', 'direct dep'], 'Income'], [['rent', 'mortgage', 'landlord'], 'Housing'], [['electric', 'water', 'internet', 'utility', 'phone'], 'Bills'], [['grocery', 'supermarket', 'whole foods', 'market'], 'Groceries'], [['restaurant', 'cafe', 'coffee', 'doordash', 'uber eats'], 'Dining'], [['uber', 'lyft', 'transit', 'parking', 'fuel', 'gas '], 'Transport'], [['doctor', 'clinic', 'pharmacy', 'medical', 'health'], 'Health'], [['fee', 'service charge', 'overdraft'], 'Fees'], [['transfer', 'venmo', 'paypal', 'zelle'], 'Transfer'], [['hotel', 'airline', 'flight'], 'Travel'], [['netflix', 'spotify', 'cinema', 'movie'], 'Entertainment']];
@@ -49,7 +50,7 @@ export class CategorizationService {
   /** Ids of every entry AI Categorization may change: not set by hand, and not covered by a saved rule. */
   async jevPendingIds(): Promise<number[]> {
     const ruled = new Set((await this.rules.find()).map(r => r.pattern));
-    const rows = await this.transactions.find({ select: { id: true, description: true }, where: { categoryManuallySet: false }, order: { date: 'DESC', id: 'DESC' } });
+    const rows = await currentTransactions(this.transactions).select(['t.id', 't.description']).andWhere('t.category_manually_set = false').orderBy('t.date', 'DESC').addOrderBy('t.id', 'DESC').getMany();
     return rows.filter(r => !ruled.has(normalizeDescription(r.description))).map(r => r.id);
   }
   /** Asks Jev for the best-fit category of one entry and saves it (unless the user set it by hand meanwhile). */

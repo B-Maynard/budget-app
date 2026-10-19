@@ -36,4 +36,19 @@ describe('DashboardComponent', () => {
 
     expect(fixture.nativeElement.querySelector('.available-value').textContent).toContain('$600.00');
   });
+
+  it('projects look-ahead balance from paydays and bills in range', () => {
+    component.income = 1000;
+    component.spendingOffset = 0;
+    component.purchaseTotal = 0;
+    component.bills = [
+      { name: 'Rent', price: 300, frequency: 'monthly', dueDay: 5, paidDates: [] },
+      { name: 'Out of range', price: 999, frequency: 'monthly', dueDay: 20, paidDates: [] },
+    ];
+    component.paydays = [{ date: '2026-10-15' }];
+    component.lookAheadFrom = '2026-10-01';
+    component.lookAheadTo = '2026-10-16';
+
+    expect(component.lookAhead?.projected).toBe(700);
+  });
 });

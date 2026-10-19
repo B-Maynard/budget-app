@@ -10,6 +10,9 @@ export class BankTransaction {
   @PrimaryGeneratedColumn('identity')
   id: number;
 
+  @Column('text', { nullable: true, unique: true, name: 'provider_transaction_id' }) providerTransactionId: string | null;
+  @Column('boolean', { default: false }) pending: boolean;
+
   @Column('integer', { name: 'import_id' }) importId: number;
   @Column('date') date: string;
   @Column('text') description: string;

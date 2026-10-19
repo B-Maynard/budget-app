@@ -97,6 +97,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public currentCycleEnd: Date | null = null;
   public generatedBills: any[] = [];
 
+  public lookAheadFrom = '';
+  public lookAheadTo = '';
+
   public paydayDates: Date[] = [];
   public calendarMonth: number = new Date().getMonth();
   public calendarYear: number = new Date().getFullYear();
@@ -163,6 +166,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
           this.calculateCycle();
           this.filterPaydaysByMonth();
+          this.setLookAheadDefaults();
 
           this.hasAuthToken = true;
           this.authService.setAuthenticated(true);
@@ -384,32 +388,74 @@ export class DashboardComponent implements OnInit, OnDestroy {
       end.setMonth(end.getMonth() + 1);
     }
 
+    this.generatedBills = this.occurrencesBetween(this.currentCycleStart, end);
+    this.billTotal = this.generatedBills
+      .filter((b) => !b.isPaid)
+      .reduce((sum, b) => sum + Number(b.price), 0);
+  }
+
+  /** Every bill occurrence in [start, end), sorted by date. */
+  occurrencesBetween(start: Date, end: Date): any[] {
+    let generated: any[] = [];
     this.bills.forEach((bill) => {
-      let occurrences = this.getOccurrences(
-        bill,
-        this.currentCycleStart!,
-        end!,
-      );
-      occurrences.forEach((dateStr) => {
-        let isPaid = bill.paidDates && bill.paidDates.includes(dateStr);
-        let generated = {
+      this.getOccurrences(bill, start, end).forEach((dateStr) => {
+        generated.push({
           ...bill,
           occurrenceDate: dateStr,
-          isPaid: isPaid,
-        };
-        this.generatedBills.push(generated);
-        if (!isPaid) {
-          this.billTotal += Number(bill.price);
-        }
+          isPaid: bill.paidDates && bill.paidDates.includes(dateStr),
+        });
       });
     });
-
-    // sort generated bills by date
-    this.generatedBills.sort(
+    return generated.sort(
       (a, b) =>
         new Date(a.occurrenceDate).getTime() -
         new Date(b.occurrenceDate).getTime(),
     );
+  }
+
+  /** Projection for a user-picked window, same math as `available`. Null if the range is invalid. */
+  get lookAhead() {
+    const start = this.day(this.lookAheadFrom);
+    const end = this.day(this.lookAheadTo);
+    if (!start || !end || end <= start) return null;
+
+    const bills = this.occurrencesBetween(start, end);
+    const billTotal = bills
+      .filter((b) => !b.isPaid)
+      .reduce((sum, b) => sum + Number(b.price), 0);
+    const paydayCount = this.paydays.filter((p: any) => {
+      const d = this.day(p.date)!;
+      return d >= start && d < end;
+    }).length;
+    const incomeTotal = paydayCount * this.income;
+
+    return {
+      bills,
+      billTotal,
+      paydayCount,
+      incomeTotal,
+      projected:
+        incomeTotal + this.spendingOffset - billTotal - this.purchaseTotal,
+    };
+  }
+
+  /** Default window: next pay period (next payday up to the payday after it). */
+  setLookAheadDefaults() {
+    if (this.lookAheadFrom) return;
+    const from =
+      this.currentCycleEnd ?? new Date(new Date().setHours(0, 0, 0, 0));
+    const to =
+      this.paydays
+        .map((p: any) => this.day(p.date)!)
+        .filter((d) => d > from)
+        .sort((a, b) => a.getTime() - b.getTime())[0] ??
+      new Date(new Date(from).setMonth(from.getMonth() + 1));
+    this.lookAheadFrom = this.formatDate(from);
+    this.lookAheadTo = this.formatDate(to);
+  }
+
+  private day(dateStr: string | null | undefined): Date | null {
+    return dateStr ? new Date(dateStr + 'T00:00:00') : null;
   }
 
   getOccurrences(bill: any, start: Date, end: Date): string[] {
@@ -420,7 +466,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     // Give a safety limit to avoid infinite loops
     let limit = 0;
 
-    while (current < end && limit < 100) {
+    // ponytail: weekly steps one day at a time, so this caps windows at ~1000 days
+    while (current < end && limit < 1000) {
       limit++;
       if (bill.frequency === 'monthly') {
         let lastDay = new Date(

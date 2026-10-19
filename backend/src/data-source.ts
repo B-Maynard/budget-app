@@ -11,6 +11,7 @@ import { CategoryRule } from './banking/entities/category-rule.entity';
 import { DescriptionObfuscation } from './banking/entities/description-obfuscation.entity';
 import { Debt } from './banking/entities/debt.entity';
 import { AiJob } from './banking/entities/ai-job.entity';
+import { BankConnection } from './banking/entities/bank-connection.entity';
 
 export default new DataSource({
   type: 'postgres',
@@ -19,7 +20,7 @@ export default new DataSource({
   username: process.env.POSTGRES_USER || 'postgres',
   password: process.env.POSTGRES_PASSWORD || 'postgrespassword',
   database: process.env.POSTGRES_DB || 'budget_app',
-  entities: [Bill, Payday, AppConfig, BankImport, BankTransaction, CategoryLimit, CategoryRule, DescriptionObfuscation, Debt, AiJob],
+  entities: [Bill, Payday, AppConfig, BankImport, BankTransaction, CategoryLimit, CategoryRule, DescriptionObfuscation, Debt, AiJob, BankConnection],
   migrations: [__dirname + '/migrations/*.{ts,js}'],
   synchronize: false,
 });

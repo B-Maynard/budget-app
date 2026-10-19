@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpContext, HttpHeaders, HttpParams } from '@angular/common/http';
+import { SILENT_REQUEST } from '../intercepters/generic.interceptor';
 import { Observable, map } from 'rxjs';
 import { apiConfig } from '../configs/apis.config';
 import { sessionConfig } from '../configs/session.config';
@@ -16,10 +17,10 @@ export class TransactionsService {
   private headers() { return new HttpHeaders({ authToken: localStorage.getItem(sessionConfig.dbAccessToken) || '' }); }
   private url(path: string) { return apiConfig.databaseRootPath + path; }
 
-  getDashboard(query: DashboardQuery): Observable<DashboardResult> {
+  getDashboard(query: DashboardQuery, silent = false): Observable<DashboardResult> {
     let params = new HttpParams();
     Object.entries(query).forEach(([key, value]) => { if (value) params = params.set(key, value); });
-    return this.http.get<DashboardResult>(this.url('/dashboard'), { headers: this.headers(), params });
+    return this.http.get<DashboardResult>(this.url('/dashboard'), { headers: this.headers(), params, context: new HttpContext().set(SILENT_REQUEST, silent) });
   }
   importCsv(file: File, accountLabel?: string): Observable<ImportResult> {
     const data = new FormData(); data.append('file', file); if (accountLabel) data.append('account_label', accountLabel);

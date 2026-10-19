@@ -12,10 +12,14 @@ import { CategorizationService } from './categorization.service';
 import { BankingService } from './banking.service';
 import { BankingController } from './banking.controller';
 import { AuthService } from '../shared/auth.service';
+import { BankConnection } from './entities/bank-connection.entity';
+import { BankConnectionsService } from './bank-connections.service';
+import { BankConnectionsController } from './bank-connections.controller';
+import { PlaidService } from './plaid.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([BankImport, BankTransaction, CategoryLimit, CategoryRule, DescriptionObfuscation, Debt, AiJob])],
-  controllers: [BankingController],
-  providers: [ImportsService, CategorizationService, BankingService, AuthService],
+  imports: [TypeOrmModule.forFeature([BankImport, BankTransaction, CategoryLimit, CategoryRule, DescriptionObfuscation, Debt, AiJob, BankConnection])],
+  controllers: [BankingController, BankConnectionsController],
+  providers: [ImportsService, CategorizationService, BankingService, AuthService, BankConnectionsService, PlaidService],
 })
 export class BankingModule {}

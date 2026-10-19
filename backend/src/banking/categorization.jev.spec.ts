@@ -9,9 +9,15 @@ const rows = [
   { id: 3, description: 'Kroger', amountCents: -9000, category: 'Dining', categoryManuallySet: true },
 ];
 const update = jest.fn().mockResolvedValue({ affected: 1 });
+const query = {
+  leftJoin: jest.fn().mockReturnThis(), where: jest.fn().mockReturnThis(),
+  select: jest.fn().mockReturnThis(), andWhere: jest.fn().mockReturnThis(),
+  orderBy: jest.fn().mockReturnThis(), addOrderBy: jest.fn().mockReturnThis(),
+  getMany: async () => rows.filter(r => !r.categoryManuallySet),
+};
 const service = new CategorizationService(
   null as any, null as any,
-  { find: async (o?: any) => rows.filter(r => !o?.where || r.categoryManuallySet === o.where.categoryManuallySet), findOne: async (o: any) => rows.find(r => r.id === o.where.id), update } as any,
+  { createQueryBuilder: () => query, find: async (o?: any) => rows.filter(r => !o?.where || r.categoryManuallySet === o.where.categoryManuallySet), findOne: async (o: any) => rows.find(r => r.id === o.where.id), update } as any,
   { find: async () => [{ pattern: 'netflix', category: 'Entertainment' }] } as any,
 );
 

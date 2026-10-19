@@ -16,6 +16,7 @@
   @if (aiProgress) {
     <p class="import-status" role="status">{{ aiProgress }}</p>
   }
+  <app-bank-connections (transactionsChanged)="load(true)" />
   <details #importSection class="details-panel import-panel">
     <summary>Import transactions</summary>
     <div class="details-content">
@@ -110,7 +111,17 @@
               <td class="transaction-date">
                 {{ t.date | date: 'MMM d, yyyy' }}
               </td>
-              <td class="transaction-description">{{ t.description }}</td>
+              <td class="transaction-description">
+                {{ t.description }}
+                @if (t.pending) {
+                  <span class="pending-badge">Pending</span>
+                }
+                @if (t.providerTransactionId) {
+                  <small class="account-source">{{
+                    accountName(t.importId)
+                  }}</small>
+                }
+              </td>
               <td class="number" [class.positive]="t.amountCents > 0">
                 {{ t.amountCents | money }}
               </td>

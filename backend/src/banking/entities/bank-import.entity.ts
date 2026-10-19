@@ -9,6 +9,8 @@ export class BankImport {
   id: number;
 
   @Column('text') filename: string;
+  @Column('integer', { nullable: true, name: 'bank_connection_id' }) bankConnectionId: number | null;
+  @Column('text', { nullable: true, unique: true, name: 'provider_account_id' }) providerAccountId: string | null;
   @Column('text', { nullable: true, name: 'account_label' }) accountLabel: string;
   @Column('text', { nullable: true, name: 'account_number' }) accountNumber: string;
   @Column('text', { nullable: true, name: 'account_type' }) accountType: string;

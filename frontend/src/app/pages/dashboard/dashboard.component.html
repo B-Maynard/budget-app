@@ -185,6 +185,87 @@
         </details>
       </aside>
     </div>
+    <section class="look-ahead" aria-label="Look ahead">
+      <div class="section-heading">
+        <h2>Look ahead</h2>
+      </div>
+      <div class="setting-row">
+        <label class="field"
+          >From<input type="date" [(ngModel)]="lookAheadFrom"
+        /></label>
+        <label class="field"
+          >To<input type="date" [(ngModel)]="lookAheadTo"
+        /></label>
+      </div>
+      @let la = lookAhead;
+      @if (la) {
+        <div class="cycle-layout">
+          <section class="cycle-bills">
+            <div class="section-heading">
+              <h2>Bills in range</h2>
+              <span class="pill">{{ la.bills.length }} bills</span>
+            </div>
+            <div class="timeline-list">
+              @for (
+                bill of la.bills;
+                track bill.occurrenceDate + (bill.id || bill._id)
+              ) {
+                <div class="timeline-row" [class.is-paid]="bill.isPaid">
+                  <div class="date-block">
+                    <span>{{ bill.occurrenceDate | date: 'MMM' }}</span
+                    ><strong>{{ bill.occurrenceDate | date: 'd' }}</strong>
+                  </div>
+                  <div class="timeline-event">
+                    <span class="item-icon"><app-icon name="bills" /></span>
+                    <div class="item-info">
+                      <strong>{{ bill.name }}</strong>
+                      @if (bill.isPaid) {
+                        <small>Paid</small>
+                      }
+                    </div>
+                    <b class="money">{{ bill.price | currency }}</b>
+                  </div>
+                </div>
+              } @empty {
+                <div class="surface empty-state">
+                  <p>No bills in this range.</p>
+                </div>
+              }
+            </div>
+          </section>
+          <aside class="cycle-summary">
+            <section class="surface balance-panel">
+              <span class="balance-label">Projected balance</span>
+              <h2 class="available-value" [class.negative]="la.projected < 0">
+                {{ la.projected | currency }}
+              </h2>
+              <div class="balance-breakdown">
+                <div>
+                  <span>Income ({{ la.paydayCount }} paydays)</span
+                  ><strong class="money">{{ la.incomeTotal | currency }}</strong>
+                </div>
+                <div>
+                  <span>Unpaid bills</span
+                  ><strong class="money">− {{ la.billTotal | currency }}</strong>
+                </div>
+                <div>
+                  <span>Purchases</span
+                  ><strong class="money">− {{ purchaseTotal | currency }}</strong>
+                </div>
+                @if (spendingOffset) {
+                  <div>
+                    <span>Adjustment</span
+                    ><strong class="money">{{ spendingOffset | currency }}</strong>
+                  </div>
+                }
+              </div>
+            </section>
+          </aside>
+        </div>
+      } @else {
+        <p class="empty-state">Pick a valid date range.</p>
+      }
+    </section>
     <div class="two-columns dashboard-lower">
       <section class="surface">
         <div class="section-heading">
