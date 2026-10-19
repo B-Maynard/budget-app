@@ -97,6 +97,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public currentCycleEnd: Date | null = null;
   public generatedBills: any[] = [];
 
+  public lookAheadBalance: number | null = null;
   public lookAheadFrom = '';
   public lookAheadTo = '';
 
@@ -413,7 +414,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     );
   }
 
-  /** Projection for a user-picked window, same math as `available`. Null if the range is invalid. */
+  /** Projection for a user-picked window: entered balance minus bills in range. Null if the range is invalid. */
   get lookAhead() {
     const start = this.day(this.lookAheadFrom);
     const end = this.day(this.lookAheadTo);
@@ -423,19 +424,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const billTotal = bills
       .filter((b) => !b.isPaid)
       .reduce((sum, b) => sum + Number(b.price), 0);
-    const paydayCount = this.paydays.filter((p: any) => {
-      const d = this.day(p.date)!;
-      return d >= start && d < end;
-    }).length;
-    const incomeTotal = paydayCount * this.income;
+    const balance = Number(this.lookAheadBalance) || 0;
 
     return {
       bills,
       billTotal,
-      paydayCount,
-      incomeTotal,
-      projected:
-        incomeTotal + this.spendingOffset - billTotal - this.purchaseTotal,
+      balance,
+      projected: balance + this.spendingOffset - billTotal - this.purchaseTotal,
     };
   }
 
